@@ -1,0 +1,17 @@
+### GET request to example server
+POST http://localhost:3001/producto/insertarProducto
+Content-Type: application/json
+
+{
+  "tituloProducto": "Depilacion Intima XL",
+  "descripcionProducto": "Servicio de depilación íntima, formato XS: cuidado delicado y acabado profesional.",
+  "valorProducto": 14900,
+  "categoriaProducto": 49,
+  "subcategoria": 4,
+  "imagenProducto": "https://picsum.photos/seed/depilacion1/800/600",
+  "imagenProductoSegunda": "https://picsum.photos/seed/depilacion2/800/600",
+  "imagenProductoTercera": "https://picsum.photos/seed/depilacion3/800/600",
+  "imagenProductoCuarta": "https://picsum.photos/seed/depilacion4/800/600"
+}
+
+
