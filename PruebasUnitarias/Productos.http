@@ -15,3 +15,26 @@ Content-Type: application/json
 }
 
 
+
+
+
+
+### POST request to example server
+POST http://localhost:3001/producto/actualizarProducto
+Content-Type: application/json
+
+{
+  "id_producto": 112,
+  "tituloProducto": "Depilación Láser Axilas",
+  "descripcionProducto": "Tratamiento de depilación láser profesional para axilas",
+  "valorProducto": 29990,
+  "categoriaProducto": 3,
+  "subcategoria": 7,
+  "imagenProducto": "https://tuservidor.cl/img/axilas-1.jpg",
+  "imagenProductoSegunda": "https://tuservidor.cl/img/axilas-2.jpg",
+  "imagenProductoTercera": "https://tuservidor.cl/img/axilas-3.jpg",
+  "imagenProductoCuarta": "https://tuservidor.cl/img/axilas-4.jpg"
+}
+
+
+

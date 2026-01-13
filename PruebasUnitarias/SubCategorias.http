@@ -52,7 +52,7 @@ POST http://localhost:3001/subcategorias/seleccionarPorCategoria
 Content-Type: application/json
 
 {
-  "id_categoriaProducto": 4,
+  "id_categoriaProducto": 48
 }
 
 

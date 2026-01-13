@@ -3,6 +3,8 @@ import Producto from "../model/Producto.js";
 export default class ProductoController {
   constructor() {}
 
+
+
     // SELECCION DE LOS PRODUCTOS DE LA BASE DE DATOS CATEGORIA POR ID
     static async seleccionarProductoCategoria(req, res) {
         try {
@@ -56,6 +58,7 @@ export default class ProductoController {
         descripcionProducto,
         valorProducto,
         categoriaProducto,
+          subcategoria,
         imagenProducto,
         imagenProductoSegunda,
         imagenProductoTercera,
@@ -67,6 +70,7 @@ export default class ProductoController {
         !descripcionProducto ||
         !valorProducto ||
           !categoriaProducto ||
+          !subcategoria ||
         !imagenProducto||
         !id_producto
       ) {
@@ -77,7 +81,9 @@ export default class ProductoController {
       const resultado = await producto.updateProducto(
         tituloProducto,
         descripcionProducto,
-        valorProducto, categoriaProducto,
+        valorProducto,
+          categoriaProducto,
+          subcategoria,
         imagenProducto,
         imagenProductoSegunda,
         imagenProductoTercera,
