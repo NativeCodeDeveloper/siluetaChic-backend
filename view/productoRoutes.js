@@ -4,7 +4,6 @@ import ProductoController from "../controller/ProductoController.js";
 
 
 router.post('/buscarSimilar', ProductoController.seleccionarProductoSimilar);
-
 router.post('/insertarProducto', ProductoController.insertarProducto);
 router.post('/actualizarProducto', ProductoController.actualizarProducto);
 router.post('/actualizarStock', ProductoController.actualizarStock);
