@@ -18,6 +18,7 @@ export default class CorreosAutomaticosController {
             }
 
             const apiKey = process.env.BREVO_API_KEY;
+            const NOMBRE_EMPRESA = process.env.NOMBRE_EMPRESA;
 
             if (!apiKey) {
                 console.error("Falta BREVO_API_KEY en .env");
@@ -32,7 +33,7 @@ export default class CorreosAutomaticosController {
                 },
                 body: JSON.stringify({
                     sender: {
-                        name: "Macar Repuestos",
+                        name: NOMBRE_EMPRESA,
                         email: "contacto@nativecode.cl",
                     },
                     to: [
@@ -43,17 +44,17 @@ export default class CorreosAutomaticosController {
                     ],
                     replyTo: {
                         email: "contacto@nativecode.cl",
-                        name: "Soporte Macar Repuestos",
+                        name: NOMBRE_EMPRESA,
                     },
                     subject: asunto,
                     htmlContent: `
                         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                            <h2 style="color: #0369a1;">Macar Repuestos</h2>
+                            <h2 style="color: #0369a1;">${NOMBRE_EMPRESA}</h2>
                             <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-top: 20px;">
                                 ${mensaje.replace(/\n/g, '<br/>')}
                             </div>
                             <p style="margin-top: 20px; color: #64748b; font-size: 14px;">
-                                Si tienes alguna consulta adicional, no dudes en contactarnos respondiendo a este correo.
+                                Si tienes alguna consulta adicional, no dudes en contactarnos en nuestros canales regulares.
                             </p>
                         </div>
                     `,
@@ -86,6 +87,7 @@ export default class CorreosAutomaticosController {
     static async enviarFormularioContacto(req, res) {
         try {
             const { nombre, email, mensaje } = req.body;
+            const NOMBRE_EMPRESA = process.env.NOMBRE_EMPRESA;
             console.log(req.body);
 
             // Validación básica
@@ -122,7 +124,7 @@ export default class CorreosAutomaticosController {
                     subject: `Nuevo mensaje de ${nombre}`,
                     htmlContent: `
 
-            <h2>Nueva consulta de Cliente desde ProSuite (Formulario de Contacto):</h2>
+            <h2>Nueva consulta de Cliente desde E-Commerce Pro (Formulario de Contacto):</h2>
             <p><strong>Nombre:</strong> ${nombre}</p>
             <p><strong>Email:</strong> ${email}</p>
             <p><strong>Mensaje:</strong><br/>${mensaje}</p>
@@ -155,6 +157,7 @@ export default class CorreosAutomaticosController {
         try {
             const { cliente, venta, productos } = req.body;
             console.log("BODY COMPROBANTE:", req.body);
+            const NOMBRE_EMPRESA = process.env.NOMBRE_EMPRESA;
 
             // Validación básica
             if (!cliente || !venta || !Array.isArray(productos) || productos.length === 0) {
@@ -210,7 +213,7 @@ export default class CorreosAutomaticosController {
                     subject: `Comprobante de compra #${venta.codigo || venta.id || ""}`,
                     htmlContent: `
                     <h2>Gracias por tu compra, ${cliente.nombre}</h2>
-                    <p>Este es el comprobante de tu compra realizada en <strong>Macar Repuestos / ProSuite</strong>.</p>
+                    <p>Este es el comprobante de tu compra realizada en <strong> ${NOMBRE_EMPRESA} </strong>.</p>
 
                     <h3>Datos de la compra</h3>
                     <p><strong>Código de pedido:</strong> ${venta.codigo || "-"}<br/>

@@ -168,6 +168,8 @@ IMPORTANTE
 
 export const recibirPago = async (req, res) => {
     const ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+    const NOMBRE_EMPRESA = process.env.NOMBRE_EMPRESA;
+
 
     if (!ACCESS_TOKEN) {
         return res.status(500).json({ error: 'No hay access token configurado en el servidor' });
@@ -360,8 +362,10 @@ export const recibirPago = async (req, res) => {
 
 
 
+
 async function enviarComprobanteCompraInterno({ cliente, venta, productos }) {
     const apiKey = process.env.BREVO_API_KEY;
+    const NOMBRE_EMPRESA = process.env.NOMBRE_EMPRESA;
     if (!apiKey) {
         console.error("Falta BREVO_API_KEY en .env");
         return;
@@ -412,7 +416,7 @@ async function enviarComprobanteCompraInterno({ cliente, venta, productos }) {
             },
             body: JSON.stringify({
                 sender: {
-                    name: nombreEmpresa,
+                    name: NOMBRE_EMPRESA,
                     email: "contacto@nativecode.cl",
                 },
                 to: [
@@ -421,12 +425,12 @@ async function enviarComprobanteCompraInterno({ cliente, venta, productos }) {
                 ],
                 replyTo: {
                     email: "contacto@nativecode.cl",
-                    name: nombreEmpresa,
+                    name: NOMBRE_EMPRESA,
                 },
                 subject: `Comprobante de compra #${venta.codigo || venta.id || ""}`,
                 htmlContent: `
                     <h2>Gracias por tu compra, ${cliente.nombre}</h2>
-                    <p>Este es el comprobante de tu compra realizada en <strong>nombreEmpresa</strong>.</p>
+                    <p>Este es el comprobante de tu compra realizada en <strong>${NOMBRE_EMPRESA}</strong>.</p>
 
                     <h3>Datos de la compra</h3>
                     <p><strong>Código de pedido:</strong> ${venta.codigo || "-"}<br/>
@@ -476,6 +480,7 @@ async function enviarComprobanteCompraInterno({ cliente, venta, productos }) {
 async function enviarNotificacionCompraDueno({ cliente, venta, productos }) {
     const apiKey = process.env.BREVO_API_KEY;
     const CORREO_RECEPTOR = process.env.CORREO_RECEPTOR;
+    const NOMBRE_EMPRESA = process.env.NOMBRE_EMPRESA;
 
     if (!apiKey) {
         console.error("Falta BREVO_API_KEY en .env");
@@ -529,7 +534,7 @@ async function enviarNotificacionCompraDueno({ cliente, venta, productos }) {
             },
             body: JSON.stringify({
                 sender: {
-                    name: "Macar Repuestos",
+                    name: NOMBRE_EMPRESA,
                     email: "contacto@nativecode.cl",
                 },
                 to: [
@@ -542,7 +547,7 @@ async function enviarNotificacionCompraDueno({ cliente, venta, productos }) {
                 },
                 subject: `Nueva compra realizada - Comprobante #${venta.codigo || venta.id || ""}`,
                 htmlContent: `
-                    <h2>Se ha realizado una nueva compra a través de E-Commerce ProSuite.</h2>
+                    <h2>Se ha realizado una nueva compra a través de E-Commerce Pro.</h2>
                     <p>Detalles de la compra:</p>
 
                     <h3>Datos del cliente</h3>
