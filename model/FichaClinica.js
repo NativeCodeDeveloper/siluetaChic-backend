@@ -1,4 +1,5 @@
-import DataBase from "../config/DataBase.js";
+import DataBase from "../config/Database.js";
+
 
 export default class FichaClinica {
     constructor(id_ficha, id_paciente, tipoAtencion, motivoConsulta, signosVitales, observaciones, anotacionConsulta, anamnesis, diagnostico, indicaciones, archivosAdjuntos, fechaConsulta, estadoFicha, consentimientoFirmado) {
