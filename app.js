@@ -14,6 +14,8 @@ import correosRoutes from "./view/correosRoutes.js";
 import cloudflareRoutes from "./view/CloudflareRoutes.js";
 import subCategoriasRoutes from "./view/subCategoriaRoutes.js";
 import reservaPacienteRoutes from "./view/reservaPacienteRoutes.js";
+import pacienteRoutes from "./view/pacientesRoutes.js";
+import fichaRoutes from "./view/fichaRoutes.js";
 
 
 const app = express();
@@ -32,6 +34,8 @@ app.use(cors(corsConfig));
 
 app.get("/", (req, res) => { res.send("Hola mundo"); });
 app.use("/pedidos", pedidosRoutes);
+app.use('/pacientes', pacienteRoutes);
+app.use('/ficha', fichaRoutes);
 app.use("/reservaPacientes", reservaPacienteRoutes);
 app.use("/cloudflare", cloudflareRoutes);
 app.use("/correo", correosRoutes);
