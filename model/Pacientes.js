@@ -34,7 +34,7 @@ export default class Pacientes {
     // SELECCION DE TODOS LOS PACIENTES DE LA BASE DE DATOS
     async selectPaciente(){
         const conexion = DataBase.getInstance();
-        const query = 'SELECT * FROM pacienteDatos';
+        const query = 'SELECT * FROM pacienteDatos WHERE estado_paciente <> 0';
         try {
             const resultado = await conexion.ejecutarQuery(query);
             return resultado;
@@ -140,9 +140,9 @@ export default class Pacientes {
         const param = [id_paciente];
         try {
             const resultado = await conexion.ejecutarQuery(query,param);
-            const filasAfectadas = resultado.affectedRows;
-            if (filasAfectadas !== undefined && filasAfectadas !== null) {
-                return filasAfectadas;
+
+            if (resultado) {
+                return resultado;
             } else {
                 return resultado;
 

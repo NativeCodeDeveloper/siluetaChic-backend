@@ -163,8 +163,11 @@ export default class PacienteController {
             }
             const paciente = new Paciente();
             const resultado = await paciente.deletePaciente(id_paciente);
-            return res.json(resultado)
-
+            if (resultado.affectedRows > 0) {
+                return res.json({message: true})
+            }else {
+                return res.status(200).json({message: false})
+            }
         } catch (error) {
             res.status(500).json({
                 error: "No se ha podido realizar la consulta desde PacienteController"

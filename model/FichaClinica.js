@@ -37,8 +37,7 @@ export default class FichaClinica {
 // 2. ELECCION DE LAS FICHAS CLINICAS ESPECIFICAS POR id_paciente
     async selectFichasPaciente(id_paciente) {
         const conexion = DataBase.getInstance();
-        const query = 'SELECT * FROM fichaClinica WHERE id_paciente = ? AND estadoFicha <> 0';
-        const param = [id_paciente]
+        const query = 'SELECT * FROM fichaClinica WHERE id_paciente = ? AND estadoFicha <> 0 ORDER BY fechaConsulta DESC';        const param = [id_paciente]
         try {
             const resultado = await conexion.ejecutarQuery(query, param);
             if (resultado) {
@@ -52,7 +51,7 @@ export default class FichaClinica {
 // 3. SELECCION DE LAS FICHAS CLINICAS ESPECIFICAS POR  id_paciente e id_fichas
     async selectFichasPacientePorId(id_paciente, id_ficha) {
         const conexion = DataBase.getInstance();
-        const query = 'SELECT * FROM fichaClinica WHERE id_paciente = ? AND id_ficha = ? AND estadoFicha <> 0';
+        const query = 'SELECT * FROM fichaClinica WHERE id_paciente = ? AND id_ficha = ? AND estadoFicha <> 0 ORDER BY fechaConsulta DESC';
         const param = [id_paciente, id_ficha]
 
         try {
@@ -115,7 +114,7 @@ export default class FichaClinica {
     // 7. SELECCION DE LAS FICHAS CLINICAS ESPECIFICAS POR id_fichas
     async seleccionarPorIdFicha(id_ficha) {
         const conexion = DataBase.getInstance();
-        const query = 'SELECT * FROM fichaClinica WHERE id_ficha = ? AND estadoFicha <> 0';
+        const query = 'SELECT * FROM fichaClinica WHERE id_ficha = ? AND estadoFicha <> 0 ORDER BY fechaConsulta DESC';
         const param = [id_ficha]
 
         try {

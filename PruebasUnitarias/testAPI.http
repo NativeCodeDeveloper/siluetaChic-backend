@@ -182,3 +182,14 @@ Content-Type: application/json
 {
   "estado_pedido": 2
 }
+
+
+
+### POST request para seleccionar segun el estado
+POST http://localhost:3001/pacientes/eliminarPaciente
+Content-Type: application/json
+
+
+{
+  "id_paciente": 21
+}
