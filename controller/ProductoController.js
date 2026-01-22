@@ -391,4 +391,26 @@ export default class ProductoController {
 
 
 
+
+
+
+
+    // SELECCION DE LOS PRODUCTOS DE LA BASE DE DATOS CATEGORIA POR ID
+    static async seleccionarProductoSubcategoria(req, res) {
+        try {
+            const { subCategoria } = req.body;
+            console.log(subCategoria);
+            const producto = new Producto();
+
+            if (!subCategoria) {
+                return res.status(404).json({message:"sindato"});
+
+            } else {
+                const dataProducto = await producto.selectProductoSubCategoria(subCategoria);
+                return res.json(dataProducto);
+            }
+        } catch (error) {
+            res.status(500).json({message: "sindato",});
+        }
+    }
 }

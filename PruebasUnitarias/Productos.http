@@ -38,3 +38,12 @@ Content-Type: application/json
 
 
 
+
+
+### POST request to example server
+POST http://localhost:3001/producto/seleccionarPorSubcategoria
+Content-Type: application/json
+
+{
+  "subCategoria": 24
+}

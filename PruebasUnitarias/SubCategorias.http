@@ -7,7 +7,7 @@ POST http://localhost:3001/subcategorias/seleccionarSubCategoriaid
 Content-Type: application/json
 
 {
-  "id_subcategoria": 4
+  "id_subcategoria": 24
 }
 
 

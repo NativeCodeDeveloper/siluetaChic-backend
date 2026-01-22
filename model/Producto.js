@@ -349,4 +349,34 @@ try {
             throw new Error('NO se logro actualizar  / Problema al establecer la conexion con la base de datos desde la clase Producto.js')
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+    //SELECCION DE PRODUCTOS POR subcategoria Producto
+    async selectProductoSubCategoria(subCategoria){
+        const conexion = DataBase.getInstance();
+        // Filtrar solo productos con estado diferente de 0
+        const query = 'SELECT * FROM productos WHERE subCategoria = ? AND estadoProducto <> 0';
+        const param = [subCategoria];
+        try {
+            const resultado = await conexion.ejecutarQuery(query, param);
+            if(Array.isArray(resultado) && resultado.length > 0){
+                return resultado;
+            }else {
+                return [];
+            }
+        } catch (error) {
+            throw new Error('Problema al establecer la conexion con la base de datos desde la clase Productos.js')
+
+        }
+    }
 }
