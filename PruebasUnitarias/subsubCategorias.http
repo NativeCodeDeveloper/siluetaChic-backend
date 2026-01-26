@@ -1,0 +1,57 @@
+### POTS request to example server
+POST  http://localhost:3001/subsubcategorias/seleccionarPorSubSubCategoria
+Content-Type: application/json
+
+{
+  "id_subsubcategoria": 1
+}
+
+
+### GET request to example server
+GET  http://localhost:3001/subsubcategorias/seleccionarTodas
+
+
+
+### POTS request to example server
+POST  http://localhost:3001/subsubcategorias/seleccionarPorSubSubCategoriaPorIdSubCategoria
+Content-Type: application/json
+
+{
+  "id_subcategoria": 26
+}
+
+
+
+### POTS request to example server
+POST  http://localhost:3001/subsubcategorias/actualizarSubSubCategoria
+Content-Type: application/json
+
+{
+  "descripcionSubSubCategoria": "Nueva descripción",
+  "id_subsubcategoria": 2
+}
+
+
+
+
+
+### POTS request to example server
+POST  http://localhost:3001/subsubcategorias/insertarSubSubCategoria
+Content-Type: application/json
+
+{
+  "descripcionSubSubCategoria": "XS MUJER",
+  "id_subcategoria": 26
+}
+
+
+
+
+
+### POTS request to example server
+POST  http://localhost:3001/subsubcategorias/eliminarSubSubCategoria
+Content-Type: application/json
+
+{
+  "id_subsubcategoria": 1
+}

@@ -17,6 +17,7 @@ import reservaPacienteRoutes from "./view/reservaPacienteRoutes.js";
 import pacienteRoutes from "./view/pacientesRoutes.js";
 import fichaRoutes from "./view/fichaRoutes.js";
 import carruselPortadaRoutes from "./view/carruselPortadaRoutes.js";
+import subSubCategoriaRoutes from "./view/subSubCategoriaRoutes.js";
 
 
 const app = express();
@@ -35,6 +36,7 @@ app.use(cors(corsConfig));
 
 app.get("/", (req, res) => { res.send("Hola mundo"); });
 app.use("/pedidos", pedidosRoutes);
+app.use("/subsubcategorias", subSubCategoriaRoutes);
 app.use("/carruselPortada", carruselPortadaRoutes);
 app.use('/pacientes', pacienteRoutes);
 app.use('/ficha', fichaRoutes);
