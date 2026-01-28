@@ -27,8 +27,9 @@ POST  http://localhost:3001/subsubcategorias/actualizarSubSubCategoria
 Content-Type: application/json
 
 {
-  "descripcionSubSubCategoria": "Nueva descripción",
-  "id_subsubcategoria": 2
+  "descripcionSubSubCategoria": "Nueva descripción random con imagen",
+  "imagenReferencial" : "sEDASDFASDFDSAfwdsf",
+  "id_subsubcategoria": 44
 }
 
 
@@ -40,8 +41,10 @@ POST  http://localhost:3001/subsubcategorias/insertarSubSubCategoria
 Content-Type: application/json
 
 {
-  "descripcionSubSubCategoria": "XS MUJER",
-  "id_subcategoria": 26
+  "descripcionSubSubCategoria": "pruebas random",
+  "imagenReferencial" : "https://ejemplo.com/imagen.jpg",
+  "id_subcategoria": 24
+
 }
 
 

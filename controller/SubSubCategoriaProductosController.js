@@ -70,16 +70,18 @@ export default class SubSubCategoriaProductosController {
     // FUNCION PARA ACTUALIZAR LOS DATOS DE LA SUBCATEGORIA SEGUN SU ID
     static async actualizarSubSubCategoria(req, res) {
         try {
-            const {descripcionSubSubCategoria,id_subsubcategoria} = req.body;
-            console.log(descripcionSubSubCategoria,id_subsubcategoria);
+            const {descripcionSubSubCategoria, imagenReferencial, id_subsubcategoria} = req.body;
+            console.log(descripcionSubSubCategoria, imagenReferencial, id_subsubcategoria);
 
             const SubSubCategoriaClass = new SubSubCategoriaProductos();
-            const resultadoConsulta = await SubSubCategoriaClass.actualizarSubSubCategoria(descripcionSubSubCategoria,id_subsubcategoria);
+            const resultadoConsulta = await SubSubCategoriaClass.actualizarSubSubCategoria(descripcionSubSubCategoria, imagenReferencial, id_subsubcategoria);
 
             if (resultadoConsulta.affectedRows > 0) {
                 return res.status(200).send({message: "true"});
+
             }else{
                 return res.status(200).send({message: "false"});
+
             }
         }catch (error) {
             console.log(error);
@@ -90,15 +92,15 @@ export default class SubSubCategoriaProductosController {
     // FUNCION PARA INSERTAR UNA NUEVA SUBCATEGORIA
     static async insertarSubSubCategoria(req, res) {
         try {
-            const {descripcionSubSubCategoria,id_subcategoria} = req.body;
-            console.log(descripcionSubSubCategoria,id_subcategoria);
+            const {descripcionSubSubCategoria, imagenReferencial, id_subcategoria} = req.body;
+            console.log(descripcionSubSubCategoria, imagenReferencial, id_subcategoria);
 
-            if (!descripcionSubSubCategoria || !id_subcategoria) {
+            if (!descripcionSubSubCategoria || !id_subcategoria || !imagenReferencial) {
                 return res.status(200).send({message: "sindata"});
             }
 
             const SubSubCategoriaClass = new SubSubCategoriaProductos();
-            const resultadoConsulta = await SubSubCategoriaClass.insertarSubSubCategoria(descripcionSubSubCategoria,id_subcategoria);
+            const resultadoConsulta = await SubSubCategoriaClass.insertarSubSubCategoria(descripcionSubSubCategoria, imagenReferencial, id_subcategoria);
 
             if (resultadoConsulta.affectedRows > 0) {
                 return res.status(200).send({message: "true"});

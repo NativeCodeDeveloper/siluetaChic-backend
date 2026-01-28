@@ -16,10 +16,13 @@ POST http://localhost:3001/subcategorias/actualizarSubCategoria
 Content-Type: application/json
 
 {
-  "descripcionCategoria": "Nuevos accesorios",
+  "descripcionCategoria": "Promociónes Pruebas",
+  "imagenSubCategoria": "linkimagenpruebas",
   "id_categoriaProducto": 49,
-  "id_subcategoria": 4
+  "id_subcategoria": 26
 }
+
+
 
 
 

@@ -57,20 +57,26 @@ export default class ProductoController {
         tituloProducto,
         descripcionProducto,
         valorProducto,
+          valor_previo,
         categoriaProducto,
           subcategoria,
+          subsubcategoria,
         imagenProducto,
         imagenProductoSegunda,
         imagenProductoTercera,
         imagenProductoCuarta,
+        especificacionProducto,
         id_producto
       } = req.body;
 
       if (!tituloProducto ||
         !descripcionProducto ||
         !valorProducto ||
+          !valor_previo ||
           !categoriaProducto ||
           !subcategoria ||
+          !subsubcategoria ||
+          !especificacionProducto||
         !imagenProducto||
         !id_producto
       ) {
@@ -79,16 +85,19 @@ export default class ProductoController {
 
       const producto = new Producto();
       const resultado = await producto.updateProducto(
-        tituloProducto,
-        descripcionProducto,
-        valorProducto,
+          tituloProducto,
+          descripcionProducto,
+          valorProducto,
+          valor_previo,
           categoriaProducto,
           subcategoria,
-        imagenProducto,
-        imagenProductoSegunda,
-        imagenProductoTercera,
-        imagenProductoCuarta,
-        id_producto
+          subsubcategoria,
+          imagenProducto,
+          imagenProductoSegunda,
+          imagenProductoTercera,
+          imagenProductoCuarta,
+          especificacionProducto,
+          id_producto
       );
 
       console.log('Resultado updateProducto:', resultado);
@@ -119,15 +128,18 @@ export default class ProductoController {
           tituloProducto,
           descripcionProducto,
           valorProducto,
+          valor_previo,
           categoriaProducto,
           subcategoria,
+          subsubcategoria,
           imagenProducto,
           imagenProductoSegunda,
           imagenProductoTercera,
-          imagenProductoCuarta
+          imagenProductoCuarta,
+          especificacionProducto
       } = req.body;
 
-      if (!tituloProducto || !descripcionProducto || !valorProducto || !categoriaProducto ||!subcategoria || !imagenProducto) {
+      if (!tituloProducto || !descripcionProducto || !valorProducto || !valor_previo || !categoriaProducto ||!subcategoria || !subsubcategoria || !imagenProducto) {
         return res.status(400).json({ message: "sindato" });
       }
 
@@ -136,12 +148,15 @@ export default class ProductoController {
           tituloProducto,
           descripcionProducto,
           valorProducto,
+          valor_previo,
           categoriaProducto,
           subcategoria,
+          subsubcategoria,
           imagenProducto,
           imagenProductoSegunda,
           imagenProductoTercera,
-          imagenProductoCuarta
+          imagenProductoCuarta,
+          especificacionProducto
       );
 
       if (resultado.affectedRows > 0) {
@@ -407,6 +422,33 @@ export default class ProductoController {
 
             } else {
                 const dataProducto = await producto.selectProductoSubCategoria(subCategoria);
+                return res.json(dataProducto);
+            }
+        } catch (error) {
+            res.status(500).json({message: "sindato",});
+        }
+    }
+
+
+
+
+
+
+
+
+
+    // SELECCION DE LOS PRODUCTOS DE LA BASE DE DATOS CATEGORIA POR ID
+    static async seleccionarProductoSubSubcategoria(req, res) {
+        try {
+            const { subsubcategoria } = req.body;
+            console.log(subsubcategoria);
+            const producto = new Producto();
+
+            if (!subsubcategoria) {
+                return res.status(404).json({message:"sindato"});
+
+            } else {
+                const dataProducto = await producto.selectProductoSubSubCategoria(subsubcategoria)
                 return res.json(dataProducto);
             }
         } catch (error) {

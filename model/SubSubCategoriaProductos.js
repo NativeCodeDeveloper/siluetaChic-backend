@@ -3,10 +3,11 @@ import DataBase from "../config/Database.js";
 
 export default class SubSubCategoriaProductos {
 
-    constructor(id_subsubcategoria,id_subcategoria,descripcionSubSubCategoria,estado_SubSubcategoria) {
+    constructor(id_subsubcategoria,id_subcategoria,descripcionSubSubCategoria,imagenReferencial,estado_SubSubcategoria) {
         this.id_subsubcategoria = id_subsubcategoria;
         this.id_subcategoria = id_subcategoria;
         this.descripcionSubSubCategoria = descripcionSubSubCategoria;
+        this.imagenReferencial = imagenReferencial;
         this.estado_SubSubcategoria = estado_SubSubcategoria;
     }
 
@@ -65,11 +66,12 @@ export default class SubSubCategoriaProductos {
     }
 
     // FUNCION PARA ACTUALIZAR LOS DATOS DE LA SUBCATEGORIA SEGUN SU ID
-    async actualizarSubSubCategoria(descripcionSubSubCategoria,id_subsubcategoria) {
+    async actualizarSubSubCategoria(descripcionSubSubCategoria, imagenReferencial, id_subsubcategoria) {
 
         try {
             const conexion = DataBase.getInstance();
-            const query = 'UPDATE SubSubCategoriaProductos SET descripcionSubSubCategoria = ? WHERE id_subsubcategoria = ? AND estado_SubSubcategoria <> 0';            const params = [descripcionSubSubCategoria,id_subsubcategoria];
+            const query = 'UPDATE SubSubCategoriaProductos SET descripcionSubSubCategoria = ?, imagenReferencial = ? WHERE id_subsubcategoria = ? AND estado_SubSubcategoria <> 0';
+            const params = [descripcionSubSubCategoria, imagenReferencial, id_subsubcategoria];
             const resultadoConsulta = await conexion.ejecutarQuery(query, params);
 
             if (resultadoConsulta){
@@ -82,11 +84,11 @@ export default class SubSubCategoriaProductos {
     }
 
     // FUNCION PARA INSERTAR UNA NUEVA SUBCATEGORIA
-    async insertarSubSubCategoria(descripcionSubSubCategoria,id_subcategoria) {
+    async insertarSubSubCategoria(descripcionSubSubCategoria, imagenReferencial, id_subcategoria) {
         try {
             const conexion = DataBase.getInstance();
-            const query = 'INSERT INTO SubSubCategoriaProductos (descripcionSubSubCategoria,id_subcategoria) VALUES (?,?)';
-            const params = [descripcionSubSubCategoria,id_subcategoria];
+            const query = 'INSERT INTO SubSubCategoriaProductos (descripcionSubSubCategoria, imagenReferencial, id_subcategoria) VALUES (?,?,?)';
+            const params = [descripcionSubSubCategoria, imagenReferencial, id_subcategoria];
 
 
             const resultadoConsulta = await conexion.ejecutarQuery(query, params);
