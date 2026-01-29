@@ -120,7 +120,17 @@ export default class Pacientes {
     async insertPaciente(nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais){
         const conexion = DataBase.getInstance();
         const query = 'INSERT INTO pacienteDatos (nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-        const param = [nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais];
+        const param = [
+            nombre??null,
+            apellido??null,
+            rut??null,
+            nacimiento??null,
+            sexo??null,
+            prevision_id??null,
+            telefono??null,
+            correo??null,
+            direccion??null,
+            pais??null];
         try {
             const resultado = await conexion.ejecutarQuery(query,param);
             if (resultado){

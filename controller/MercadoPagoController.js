@@ -4,6 +4,7 @@ import MercadoPago from '../model/MercadoPago.js';
 import PedidoComprasController from "../controller/PedidoComprasController.js";
 import PedidoCompras from "../model/PedidoCompras.js";
 import PedidoDetalle from "../model/PedidoDetalle.js";
+import Pacientes from "../model/Pacientes.js";
 
 dotenv.config();
 
@@ -248,8 +249,10 @@ export const recibirPago = async (req, res) => {
             //SE DEBE CONSIDERAR SI O SI EL ESTADO DE PAGO A APROVED PARA PRODUCCION
 
             try{
+
                 const instanciaPedidoCompra = new PedidoCompras();
                 const resultadoQuery = await instanciaPedidoCompra.cambiarEstadoaPagado(preference_id)
+
                 if(resultadoQuery.affectedRows > 0){
 
 
@@ -262,9 +265,29 @@ export const recibirPago = async (req, res) => {
                         const pedido = Array.isArray(pedidos) && pedidos.length > 0 ? pedidos[0] : null;
 
                         if (pedido) {
-                            // obtener detalles del pedido
+                            // obtener detalles del pedido e insertar paciente en data
+                            const instanciaPacientes = Pacientes();
                             const instanciaPedidoDetalle = new PedidoDetalle();
                             const productos = await instanciaPedidoDetalle.seleccionarPedidosDetallePorID(pedido.id_pedido) || [];
+
+                            const pacientes = {
+                                nombre: pedido.nombre_comprador ,
+                                apellido : pedido.apellidosComprador ,
+                                rut : pedido.identificacion_comprador ,
+                                nacimiento : null,
+                                sexo : null,
+                                prevision_id : null,
+                                telefono : pedido.telefono_comprador,
+                                correo : pedido.email_Comprador,
+                                direccion: null,
+                                pais: null
+                            }
+
+                            const insertarPacienteQuePago = await instanciaPacientes.insertPaciente(pacientes);
+                            if (insertarPacienteQuePago.affectedRows > 0) {
+                                console.log("Paciente insertado correctamente ");
+
+                            }
 
                             const cliente = {
                                 nombre: pedido.nombre_comprador,
