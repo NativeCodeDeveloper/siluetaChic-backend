@@ -394,7 +394,8 @@ export default class ReservaPacienteController {
                         horaInicio,
                         fechaFinalizacion,
                         horaFinalizacion,
-                        estadoReserva
+                        estadoReserva,
+                        id_reserva: resultadoQuery.insertId
                     }).catch(err => {
                         console.error("[MAIL] Error:", err.message);
                     });

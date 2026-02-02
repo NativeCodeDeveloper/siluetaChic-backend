@@ -19,6 +19,7 @@ import fichaRoutes from "./view/fichaRoutes.js";
 import carruselPortadaRoutes from "./view/carruselPortadaRoutes.js";
 import subSubCategoriaRoutes from "./view/subSubCategoriaRoutes.js";
 import especificacionProductoRoutes from "./view/especificacionProductoRoutes.js";
+import notificacionAgendamientoRoutes from "./view/notificacionAgendamientoRoutes.js";
 
 
 const app = express();
@@ -54,6 +55,7 @@ app.use("/categorias", categoriaRoutes);
 app.use("/subcategorias", subCategoriasRoutes);
 app.use("/publicaciones", publicacionesRoutes);
 app.use('/contacto', contactoRouter );
+app.use('/notificacion', notificacionAgendamientoRoutes);
 
 const PORT = process.env.PORT || 3000;
 

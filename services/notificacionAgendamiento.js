@@ -9,9 +9,10 @@ export default class NotificacionAgendamiento {
     horaInicio,
     fechaFinalizacion,
     horaFinalizacion,
-    estadoReserva
+    estadoReserva,
+    id_reserva
   }) {
-    const { BREVO_API_KEY, CORREO_RECEPTOR, NOMBRE_EMPRESA } = process.env;
+    const { BREVO_API_KEY, CORREO_RECEPTOR, NOMBRE_EMPRESA, API_URL } = process.env;
 
     // No romper el flujo principal si falta configuración
     if (!BREVO_API_KEY) {
@@ -66,19 +67,32 @@ export default class NotificacionAgendamiento {
       `Si necesitas modificar o cancelar tu reserva, responde este correo.\n\n` +
       `Saludos.`;
 
+    // Construir URLs para confirmar/cancelar
+    const baseUrl = API_URL || "http://localhost:3001";
+    const urlConfirmar = `${baseUrl}/notificacion/confirmar?id_reserva=${id_reserva}&nombrePaciente=${encodeURIComponent(nombrePaciente)}&apellidoPaciente=${encodeURIComponent(apellidoPaciente)}&fechaInicio=${encodeURIComponent(fechaInicio)}&horaInicio=${encodeURIComponent(horaInicio)}`;
+    const urlCancelar = `${baseUrl}/notificacion/cancelar?id_reserva=${id_reserva}&nombrePaciente=${encodeURIComponent(nombrePaciente)}&apellidoPaciente=${encodeURIComponent(apellidoPaciente)}&fechaInicio=${encodeURIComponent(fechaInicio)}&horaInicio=${encodeURIComponent(horaInicio)}`;
+
     const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
-        <h2>¡Tu cita con Silueta Chic ha sido confirmada! 🎉</h2>
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #667eea;">¡Tu cita con Silueta Chic ha sido confirmada! 🎉</h2>
         <p>Hola <b>${nombrePaciente} ${apellidoPaciente}</b>,</p>
         <p><b>Detalle de tu reserva:</b></p>
-        <ul>
-          <li><b>RUT:</b> ${rut}</li>
-          <li><b>Teléfono:</b> ${telefono}</li>
-          <li><b>Inicio:</b> ${fechaInicio} ${horaInicio}</li>
-          <li><b>Término:</b> ${fechaFinalizacion} ${horaFinalizacion}</li>
+        <ul style="list-style: none; padding: 0; background: #f3f4f6; padding: 15px; border-radius: 8px;">
+          <li style="margin-bottom: 8px;"><b>RUT:</b> ${rut}</li>
+          <li style="margin-bottom: 8px;"><b>Teléfono:</b> ${telefono}</li>
+          <li style="margin-bottom: 8px;"><b>Inicio:</b> ${fechaInicio} ${horaInicio}</li>
+          <li style="margin-bottom: 8px;"><b>Término:</b> ${fechaFinalizacion} ${horaFinalizacion}</li>
           <li><b>Estado:</b> ${estadoReserva}</li>
         </ul>
-        <hr />
+
+        <!-- Botones de acción -->
+        <div style="text-align: center; margin: 30px 0;">
+          <p style="margin-bottom: 15px; font-weight: bold; color: #374151;">¿Confirmas tu asistencia?</p>
+          <a href="${urlConfirmar}" style="display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 0 10px; font-weight: bold;">✅ Confirmar Cita</a>
+          <a href="${urlCancelar}" style="display: inline-block; background: #ef4444; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 0 10px; font-weight: bold;">❌ Cancelar Cita</a>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
         <p><b>Preparación Obligatoria:</b></p>
         <ul>
           <li>La zona debe asistir rasurada con rasuradora de varón (máx. 24h antes) y limpia e higienizada (sin cremas, maquillaje, desodorantes, etc.).</li>
@@ -104,8 +118,13 @@ export default class NotificacionAgendamiento {
           <li>Evitar calor/sudor (24 horas).</li>
           <li>No depilar con métodos de arranque.</li>
         </ul>
-        <p>Si necesitas modificar o cancelar tu reserva, responde este correo.</p>
-        <p>Saludos.</p>
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
+        <p style="text-align: center; color: #6b7280; font-size: 14px;">
+          Si tienes dudas, responde este correo o contáctanos directamente.
+        </p>
+        <p style="text-align: center; color: #667eea; font-weight: bold;">
+          ¡Nos vemos pronto! 💜
+        </p>
       </div>
     `;
 
@@ -142,5 +161,103 @@ export default class NotificacionAgendamiento {
     // Si quieres debug, descomenta:
     // const data = await resp.json();
     // console.log("[MAIL] Enviado OK:", data);
+  }
+
+  // Envía notificación al equipo cuando un paciente confirma o cancela su cita
+  static async enviarCorreoConfirmacionEquipo({
+    nombrePaciente,
+    apellidoPaciente,
+    fechaInicio,
+    horaInicio,
+    accion, // "CONFIRMADA" o "CANCELADA"
+    id_reserva
+  }) {
+    const { BREVO_API_KEY, CORREO_RECEPTOR, NOMBRE_EMPRESA } = process.env;
+
+    if (!BREVO_API_KEY) {
+      console.warn("[MAIL EQUIPO] BREVO_API_KEY no configurada. Correo no enviado.");
+      return;
+    }
+
+    const fromEmail = CORREO_RECEPTOR;
+    const fromName = NOMBRE_EMPRESA || "SiluetaChic";
+
+    if (!fromEmail) {
+      console.warn("[MAIL EQUIPO] CORREO_RECEPTOR no configurado. Correo no enviado.");
+      return;
+    }
+
+    const destinatario = "desarrollo.native.code@gmail.com";
+
+    const esConfirmacion = accion === "CONFIRMADA";
+    const subject = esConfirmacion
+      ? `✅ Cita CONFIRMADA por ${nombrePaciente} ${apellidoPaciente}`
+      : `❌ Cita CANCELADA por ${nombrePaciente} ${apellidoPaciente}`;
+
+    const text = esConfirmacion
+      ? `El paciente ${nombrePaciente} ${apellidoPaciente} ha CONFIRMADO su cita.\n\n` +
+        `• ID Reserva: ${id_reserva}\n` +
+        `• Fecha: ${fechaInicio}\n` +
+        `• Hora: ${horaInicio}\n\n` +
+        `El paciente confirmó desde el enlace del correo.`
+      : `El paciente ${nombrePaciente} ${apellidoPaciente} ha CANCELADO su cita.\n\n` +
+        `• ID Reserva: ${id_reserva}\n` +
+        `• Fecha: ${fechaInicio}\n` +
+        `• Hora: ${horaInicio}\n\n` +
+        `El paciente canceló desde el enlace del correo.`;
+
+    const colorAccion = esConfirmacion ? "#10b981" : "#ef4444";
+    const iconoAccion = esConfirmacion ? "✅" : "❌";
+    const textoAccion = esConfirmacion ? "CONFIRMADA" : "CANCELADA";
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
+        <div style="background: ${colorAccion}; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h2 style="margin: 0; font-size: 24px;">${iconoAccion} Cita ${textoAccion}</h2>
+        </div>
+        <div style="padding: 20px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;">
+          <p><b>Paciente:</b> ${nombrePaciente} ${apellidoPaciente}</p>
+          <p><b>ID Reserva:</b> ${id_reserva}</p>
+          <p><b>Fecha:</b> ${fechaInicio}</p>
+          <p><b>Hora:</b> ${horaInicio}</p>
+          <p><b>Acción:</b> El paciente ${textoAccion.toLowerCase()} su cita desde el enlace del correo.</p>
+          <hr style="border: none; border-top: 1px solid #d1d5db; margin: 20px 0;" />
+          <p style="font-size: 12px; color: #6b7280;">
+            Este es un correo automático del sistema de agendamiento de Silueta Chic.
+          </p>
+        </div>
+      </div>
+    `;
+
+    const payload = {
+      sender: { name: fromName, email: fromEmail },
+      to: [{ email: destinatario }],
+      subject,
+      textContent: text,
+      htmlContent: html
+    };
+
+    if (typeof fetch !== "function") {
+      console.warn("[MAIL EQUIPO] Tu Node no tiene fetch (requiere Node 18+). Correo no enviado.");
+      return;
+    }
+
+    const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        "api-key": BREVO_API_KEY
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => "");
+      console.error("[MAIL EQUIPO] Brevo error:", resp.status, errText);
+      return;
+    }
+
+    console.log(`[MAIL EQUIPO] Notificación enviada: Cita ${textoAccion}`);
   }
 }
