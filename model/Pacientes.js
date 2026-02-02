@@ -121,16 +121,17 @@ export default class Pacientes {
         const conexion = DataBase.getInstance();
         const query = 'INSERT INTO pacienteDatos (nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         const param = [
-            nombre??null,
-            apellido??null,
-            rut??null,
-            nacimiento??null,
-            sexo??null,
-            prevision_id??null,
-            telefono??null,
-            correo??null,
-            direccion??null,
-            pais??null];
+            nombre,
+            apellido,
+            rut,
+            nacimiento,
+            sexo,
+            prevision_id,
+            telefono,
+            correo,
+            direccion,
+            pais];
+
         try {
             const resultado = await conexion.ejecutarQuery(query,param);
             if (resultado){
@@ -162,4 +163,42 @@ export default class Pacientes {
 
         }
     }
+
+
+
+
+
+
+
+// INSERCION DE NUEVO PACIENTE EN LA BASE DE DATOS
+    async insertPacientemp(nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais){
+        const conexion = DataBase.getInstance();
+
+        try {
+            const queryVerificadora = 'SELECT * FROM pacienteDatos WHERE rut = ?';
+            const paramVerificadora = [rut];
+
+            const respuestaConsultaVerificacion = await conexion.ejecutarQuery(queryVerificadora, paramVerificadora);
+
+            if (respuestaConsultaVerificacion.length > 0) {
+                // Ya existe un paciente con ese preference_id
+                return { duplicado: true };
+            }else{
+
+                const query = 'INSERT INTO pacienteDatos (nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                const param = [nombre, apellido, rut, nacimiento, sexo, prevision_id, telefono, correo, direccion, pais];
+                const resultado = await conexion.ejecutarQuery(query,param);
+                if (resultado){
+                    return resultado;
+                }
+            }
+
+        } catch (error) {
+            throw new Error('NO se logo ingresar paciente nuevo / Problema al establecer la conexion con la base de datos desde la clase Pacientes.js')
+        }
+    }
+
+
+
+
 }

@@ -266,28 +266,45 @@ export const recibirPago = async (req, res) => {
 
                         if (pedido) {
                             // obtener detalles del pedido e insertar paciente en data
-                            const instanciaPacientes = Pacientes();
+                            const instanciaPacientes = new Pacientes();
                             const instanciaPedidoDetalle = new PedidoDetalle();
                             const productos = await instanciaPedidoDetalle.seleccionarPedidosDetallePorID(pedido.id_pedido) || [];
 
-                            const pacientes = {
-                                nombre: pedido.nombre_comprador ,
-                                apellido : pedido.apellidosComprador ,
-                                rut : pedido.identificacion_comprador ,
-                                nacimiento : null,
-                                sexo : null,
-                                prevision_id : null,
-                                telefono : pedido.telefono_comprador,
-                                correo : pedido.email_Comprador,
-                                direccion: null,
-                                pais: null
-                            }
 
-                            const insertarPacienteQuePago = await instanciaPacientes.insertPaciente(pacientes);
+
+                                let nombre = pedido.nombre_comprador ;
+                                let apellido = pedido.apellidosComprador ;
+                                let rut = pedido.identificacion_comprador ;
+                                let nacimiento = null;
+                                let sexo = '---' ;
+                                let prevision_id = 0;
+                                let telefono = pedido.telefono_comprador ?? pedido.telefono ?? 'NO INGRESADO';
+                                let correo = pedido.email_Comprador ?? pedido.email_Comprador ?? pedido.correo ?? 'NO INGRESADO';
+                                let direccion = '---';
+                                let pais = '---';
+
+
+                            const insertarPacienteQuePago = await instanciaPacientes.insertPacientemp(
+                                nombre,
+                                apellido,
+                                rut,
+                                nacimiento,
+                                sexo,
+                                prevision_id,
+                                telefono,
+                                correo,
+                                direccion,
+                                pais
+                            );
+
                             if (insertarPacienteQuePago.affectedRows > 0) {
                                 console.log("Paciente insertado correctamente ");
-
+                                console.log(correo);
+                            }else{
+                                console.log("Paciente no se pudo insertar por duplicacion en el Numero unico de identificacion (RUT) ");
+                                console.log(rut);
                             }
+
 
                             const cliente = {
                                 nombre: pedido.nombre_comprador,

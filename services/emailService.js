@@ -23,3 +23,8 @@ export async function enviarCorreoComprobante({ correoDestino, nombre }) {
 
     await transporter.sendMail(mailOptions);
 }
+
+
+
+
+

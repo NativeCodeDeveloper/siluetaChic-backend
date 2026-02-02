@@ -1,4 +1,6 @@
 import ReservaPacientes from "../model/ReservaPacientes.js";
+import Pacientes from "../model/Pacientes.js";
+import NotificacionAgendamiento from "../services/notificacionAgendamiento.js";
 
 export default class ReservaPacienteController {
     constructor() {
@@ -286,6 +288,7 @@ export default class ReservaPacienteController {
                 fechaFinalizacion,
                 horaFinalizacion,
                 estadoReserva
+
             } = req.body;
 
             console.log(req.body);
@@ -304,6 +307,98 @@ export default class ReservaPacienteController {
                 const resultadoQuery = await claseReservaPaciente.insertarReservaPaciente(nombrePaciente, apellidoPaciente, rut, telefono, email, fechaInicio, horaInicio, fechaFinalizacion, horaFinalizacion, estadoReserva)
 
                 if (resultadoQuery.affectedRows > 0) {
+                    // Enviar correo de confirmación (no bloquear la respuesta si falla)
+
+
+                    return res.status(200).send({message: true})
+                } else {
+                    return res.status(200).send({message: false})
+                }
+            }
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).send({message: error.message});
+        }
+    }
+
+
+
+    //FUNCION PARA INSERTAR PACIENTE Y FICHAS SEGUN SI EXITES O NO PREVIAMENTE INGRESADOS, RUT MANDA.
+    static async insertarReservaPacienteFicha(req, res) {
+        try {
+            const {
+                nombrePaciente,
+                apellidoPaciente,
+                rut,
+                telefono,
+                email,
+                fechaInicio,
+                horaInicio,
+                fechaFinalizacion,
+                horaFinalizacion,
+                estadoReserva
+            } = req.body;
+
+            console.log(req.body);
+
+            if (!nombrePaciente || !apellidoPaciente || !rut || !telefono || !email || !fechaInicio || !horaInicio || !fechaFinalizacion || !horaFinalizacion || !estadoReserva) {
+                return res.status(400).send({message: "sindata"})
+            }
+
+
+            let nombre = nombrePaciente;
+            let apellido = apellidoPaciente;
+            let nacimiento = null;
+            let sexo = null;
+            let prevision_id = 0;
+            let correo = null;
+            let direccion = null;
+            let pais = 'chile';
+
+
+
+            const clasePacientes = new Pacientes();
+            const respuestaBackendPaciente = await clasePacientes.insertPacientemp(nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais);
+
+            if (respuestaBackendPaciente.affectedRows > 0) {
+                console.log("Paciente ingresado correctamente desde reserva");
+
+            }else if (respuestaBackendPaciente.duplicado === true) {
+                console.log("Error al ingresar paciente desde reserva : Paciente ya existe");
+
+            }
+
+
+
+
+            const claseReservaPaciente = new ReservaPacientes();
+
+            const validacionHoras = await claseReservaPaciente.validarDisponibilidadBoolean(fechaInicio, horaInicio, fechaFinalizacion, horaFinalizacion);
+            if (!validacionHoras) {
+                return res.status(400).send({message: "conflicto"})
+            } else {
+
+                const resultadoQuery = await claseReservaPaciente.insertarReservaPaciente(nombrePaciente, apellidoPaciente, rut, telefono, email, fechaInicio, horaInicio, fechaFinalizacion, horaFinalizacion, estadoReserva)
+
+                if (resultadoQuery.affectedRows > 0) {
+                    // Enviar correo de confirmación (no bloquear la respuesta si falla)
+
+                    NotificacionAgendamiento.enviarCorreoConfirmacionReserva({
+                        to: email,
+                        nombrePaciente,
+                        apellidoPaciente,
+                        rut,
+                        telefono,
+                        fechaInicio,
+                        horaInicio,
+                        fechaFinalizacion,
+                        horaFinalizacion,
+                        estadoReserva
+                    }).catch(err => {
+                        console.error("[MAIL] Error:", err.message);
+                    });
+
                     return res.status(200).send({message: true})
                 } else {
                     return res.status(200).send({message: false})
