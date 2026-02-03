@@ -68,7 +68,7 @@ export default class NotificacionAgendamiento {
       `Saludos.`;
 
     // Construir URLs para confirmar/cancelar
-    const baseUrl = process.env.FRONT_URL || "http://localhost:3001";
+    const baseUrl = process.env.BACKEND_URL || "https://siluetachic.nativecode.cl";
     const urlConfirmar = `${baseUrl}/notificacion/confirmar?id_reserva=${id_reserva}&nombrePaciente=${encodeURIComponent(nombrePaciente)}&apellidoPaciente=${encodeURIComponent(apellidoPaciente)}&fechaInicio=${encodeURIComponent(fechaInicio)}&horaInicio=${encodeURIComponent(horaInicio)}`;
     const urlCancelar = `${baseUrl}/notificacion/cancelar?id_reserva=${id_reserva}&nombrePaciente=${encodeURIComponent(nombrePaciente)}&apellidoPaciente=${encodeURIComponent(apellidoPaciente)}&fechaInicio=${encodeURIComponent(fechaInicio)}&horaInicio=${encodeURIComponent(horaInicio)}`;
 
