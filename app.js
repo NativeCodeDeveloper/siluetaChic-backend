@@ -20,6 +20,7 @@ import carruselPortadaRoutes from "./view/carruselPortadaRoutes.js";
 import subSubCategoriaRoutes from "./view/subSubCategoriaRoutes.js";
 import especificacionProductoRoutes from "./view/especificacionProductoRoutes.js";
 import notificacionAgendamientoRoutes from "./view/notificacionAgendamientoRoutes.js";
+import { ejecutarRecordatoriosAutomaticos } from "./services/notificacionPreviaDia.js";
 
 
 const app = express();
@@ -57,8 +58,30 @@ app.use("/publicaciones", publicacionesRoutes);
 app.use('/contacto', contactoRouter );
 app.use('/notificacion', notificacionAgendamientoRoutes);
 
+// Ruta para ejecutar recordatorios manualmente (útil para testing)
+app.get('/recordatorios/ejecutar', async (req, res) => {
+    try {
+        const resultado = await ejecutarRecordatoriosAutomaticos();
+        res.json({ ok: true, ...resultado });
+    } catch (error) {
+        res.status(500).json({ ok: false, error: error.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
     console.log(`BACKEND CORRIENDO SIN PROBLEMAS EN --->  http://localhost:${PORT}`);
+
+    // CRON JOB: Ejecutar recordatorios automáticos cada 5 minutos
+    console.log("[CRON] Iniciando cron job de recordatorios (cada 5 minutos)...");
+    setInterval(async () => {
+        await ejecutarRecordatoriosAutomaticos();
+    }, 5 * 60 * 1000); // 5 minutos en milisegundos
+
+    // Ejecutar una vez al iniciar el servidor
+    setTimeout(async () => {
+        console.log("[CRON] Ejecutando primera revisión de recordatorios...");
+        await ejecutarRecordatoriosAutomaticos();
+    }, 10000); // Esperar 10 segundos después de iniciar
 })
