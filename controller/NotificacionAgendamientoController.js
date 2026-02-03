@@ -1,4 +1,5 @@
 import NotificacionAgendamiento from "../services/notificacionAgendamiento.js";
+import ReservaPacientes from "../model/ReservaPacientes.js";
 
 export default class NotificacionAgendamientoController {
 
@@ -20,18 +21,30 @@ export default class NotificacionAgendamientoController {
         });
       }
 
-      // Enviar correo de confirmación al equipo
-      await NotificacionAgendamiento.enviarCorreoConfirmacionEquipo({
-        nombrePaciente,
-        apellidoPaciente,
-        fechaInicio,
-        horaInicio,
-        accion: "CONFIRMADA",
-        id_reserva
-      });
+      const reservaPacienteClass = new ReservaPacientes();
+      const estadoReserva = "CONFIRMADA";
+      const respuestaBackend = await reservaPacienteClass.actualizarEstado(estadoReserva, id_reserva);
 
-      // Redirigir a una página de confirmación exitosa
-      return res.send(`
+      if(respuestaBackend.affectedRows > 0) {
+          console.log("[CONFIRMAR CITA] Reserva confirmada correctamente.");
+          console.log(respuestaBackend);
+      }else{
+            console.log("[CONFIRMAR CITA] No se pudo confirmar la reserva: no existe o ya está confirmada.");
+          console.log(respuestaBackend);
+      }
+
+          // Enviar correo de confirmación al equipo
+          await NotificacionAgendamiento.enviarCorreoConfirmacionEquipo({
+              nombrePaciente,
+              apellidoPaciente,
+              fechaInicio,
+              horaInicio,
+              accion: "CONFIRMADA",
+              id_reserva
+          });
+
+          // Redirigir a una página de confirmación exitosa
+          return res.send(`
         <!DOCTYPE html>
         <html lang="es">
         <head>
@@ -100,6 +113,8 @@ export default class NotificacionAgendamientoController {
         </html>
       `);
 
+
+
     } catch (error) {
       console.error("[CONFIRMAR CITA] Error:", error);
       return res.status(500).json({
@@ -108,6 +123,16 @@ export default class NotificacionAgendamientoController {
       });
     }
   }
+
+
+
+
+
+
+
+
+
+
 
   // Endpoint para cancelar una cita
   static async cancelarCita(req, res) {
@@ -127,18 +152,31 @@ export default class NotificacionAgendamientoController {
         });
       }
 
-      // Enviar correo de cancelación al equipo
-      await NotificacionAgendamiento.enviarCorreoConfirmacionEquipo({
-        nombrePaciente,
-        apellidoPaciente,
-        fechaInicio,
-        horaInicio,
-        accion: "CANCELADA",
-        id_reserva
-      });
+      const reservaPacienteClass = new ReservaPacientes();
+        const estadoReserva = "ANULADA";
+      const respuestaBackend = await reservaPacienteClass.actualizarEstado(estadoReserva, id_reserva);
 
-      // Redirigir a una página de cancelación exitosa
-      return res.send(`
+
+        if(respuestaBackend.affectedRows > 0) {
+            console.log("[ANULAR CITA] Reserva ANULADA correctamente.");
+            console.log(respuestaBackend);
+        }else{
+            console.log("[ANULAR CITA] No se pudo ANULAR la reserva: no existe o ya está ANULADA.");
+            console.log(respuestaBackend);
+        }
+
+        // Enviar correo de cancelación al equipo
+        await NotificacionAgendamiento.enviarCorreoConfirmacionEquipo({
+          nombrePaciente,
+          apellidoPaciente,
+          fechaInicio,
+          horaInicio,
+          accion: "CANCELADA",
+          id_reserva,
+        });
+
+        // Redirigir a una página de cancelación exitosa
+        return res.send(`
         <!DOCTYPE html>
         <html lang="es">
         <head>
@@ -206,6 +244,13 @@ export default class NotificacionAgendamientoController {
         </body>
         </html>
       `);
+
+
+      // Si no se actualizó nada, evita que el request quede colgado
+      return res.status(404).json({
+        ok: false,
+        message: "No se pudo cancelar: la reserva no existe o ya estaba anulada",
+      });
 
     } catch (error) {
       console.error("[CANCELAR CITA] Error:", error);
