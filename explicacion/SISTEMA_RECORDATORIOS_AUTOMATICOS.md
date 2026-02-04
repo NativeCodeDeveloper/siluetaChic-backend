@@ -210,12 +210,12 @@ Aquí se inicia el Cron Job cuando arranca el servidor:
 
 ```javascript
 // Importación
-import { ejecutarRecordatoriosAutomaticos } from "./services/notificacionPreviaDia.js";
+import {ejecutarRecordatoriosAutomaticos} from "./notificacionPreviaDia.js";
 
 // Ruta para ejecutar manualmente (útil para pruebas)
 app.get('/recordatorios/ejecutar', async (req, res) => {
     const resultado = await ejecutarRecordatoriosAutomaticos();
-    res.json({ ok: true, ...resultado });
+    res.json({ok: true, ...resultado});
 });
 
 // CRON JOB automático cada 5 minutos

@@ -163,13 +163,13 @@ export default class NotificacionAgendamiento {
     // console.log("[MAIL] Enviado OK:", data);
   }
 
-  // Envía notificación al equipo cuando un paciente confirma o cancela su cita
+  // Envía notificación al equipo cuando un paciente confirma, cancela o agenda una cita
   static async enviarCorreoConfirmacionEquipo({
     nombrePaciente,
     apellidoPaciente,
     fechaInicio,
     horaInicio,
-    accion, // "CONFIRMADA" o "CANCELADA"
+    accion, // "CONFIRMADA", "CANCELADA" o "AGENDADA"
     id_reserva
   }) {
     const { BREVO_API_KEY, CORREO_RECEPTOR, NOMBRE_EMPRESA } = process.env;
@@ -189,26 +189,49 @@ export default class NotificacionAgendamiento {
 
     const destinatario = "desarrollo.native.code@gmail.com";
 
-    const esConfirmacion = accion === "CONFIRMADA";
-    const subject = esConfirmacion
-      ? `✅ Cita CONFIRMADA por ${nombrePaciente} ${apellidoPaciente}`
-      : `❌ Cita CANCELADA por ${nombrePaciente} ${apellidoPaciente}`;
+    let subject, text, colorAccion, iconoAccion, textoAccion, detalleAccion;
 
-    const text = esConfirmacion
-      ? `El paciente ${nombrePaciente} ${apellidoPaciente} ha CONFIRMADO su cita.\n\n` +
-        `• ID Reserva: ${id_reserva}\n` +
-        `• Fecha: ${fechaInicio}\n` +
-        `• Hora: ${horaInicio}\n\n` +
-        `El paciente confirmó desde el enlace del correo.`
-      : `El paciente ${nombrePaciente} ${apellidoPaciente} ha CANCELADO su cita.\n\n` +
-        `• ID Reserva: ${id_reserva}\n` +
-        `• Fecha: ${fechaInicio}\n` +
-        `• Hora: ${horaInicio}\n\n` +
-        `El paciente canceló desde el enlace del correo.`;
+    switch (accion) {
+      case "CONFIRMADA":
+        subject = `✅ Cita CONFIRMADA por ${nombrePaciente} ${apellidoPaciente}`;
+        textoAccion = "CONFIRMADA";
+        iconoAccion = "✅";
+        colorAccion = "#10b981";
+        detalleAccion = "El paciente confirmó su cita desde el enlace del correo.";
+        text = `El paciente ${nombrePaciente} ${apellidoPaciente} ha CONFIRMADO su cita.\n\n` +
+               `• ID Reserva: ${id_reserva}\n` +
+               `• Fecha: ${fechaInicio}\n` +
+               `• Hora: ${horaInicio}\n\n` +
+               `${detalleAccion}`;
+        break;
+      
+      case "AGENDADA":
+        subject = `🗓️ Nueva Reserva (Agenda Clínica) - ${nombrePaciente} ${apellidoPaciente}`;
+        textoAccion = "NUEVA RESERVA";
+        iconoAccion = "🗓️";
+        colorAccion = "#3b82f6"; // Azul para nueva reserva
+        detalleAccion = "La reserva fue creada manualmente desde la agenda clínica.";
+        text = `Se ha creado una nueva reserva desde la agenda clínica para ${nombrePaciente} ${apellidoPaciente}.\n\n` +
+               `• ID Reserva: ${id_reserva}\n` +
+               `• Fecha: ${fechaInicio}\n` +
+               `• Hora: ${horaInicio}\n\n` +
+               `${detalleAccion}`;
+        break;
 
-    const colorAccion = esConfirmacion ? "#10b981" : "#ef4444";
-    const iconoAccion = esConfirmacion ? "✅" : "❌";
-    const textoAccion = esConfirmacion ? "CONFIRMADA" : "CANCELADA";
+      case "CANCELADA":
+      default:
+        subject = `❌ Cita CANCELADA por ${nombrePaciente} ${apellidoPaciente}`;
+        textoAccion = "CANCELADA";
+        iconoAccion = "❌";
+        colorAccion = "#ef4444";
+        detalleAccion = "El paciente canceló su cita desde el enlace del correo.";
+        text = `El paciente ${nombrePaciente} ${apellidoPaciente} ha CANCELADO su cita.\n\n` +
+               `• ID Reserva: ${id_reserva}\n` +
+               `• Fecha: ${fechaInicio}\n` +
+               `• Hora: ${horaInicio}\n\n` +
+               `${detalleAccion}`;
+        break;
+    }
 
     const html = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
@@ -220,7 +243,7 @@ export default class NotificacionAgendamiento {
           <p><b>ID Reserva:</b> ${id_reserva}</p>
           <p><b>Fecha:</b> ${fechaInicio}</p>
           <p><b>Hora:</b> ${horaInicio}</p>
-          <p><b>Acción:</b> El paciente ${textoAccion.toLowerCase()} su cita desde el enlace del correo.</p>
+          <p><b>Acción:</b> ${detalleAccion}</p>
           <hr style="border: none; border-top: 1px solid #d1d5db; margin: 20px 0;" />
           <p style="font-size: 12px; color: #6b7280;">
             Este es un correo automático del sistema de agendamiento de Silueta Chic.
