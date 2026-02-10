@@ -25,6 +25,12 @@ export default class NotificacionAgendamiento {
       return;
     }
 
+    const emailOk = typeof to === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to);
+    if (!emailOk) {
+      console.warn("[MAIL] Email inválido:", to, "Correo no enviado.");
+      return;
+    }
+
     // En Brevo, el 'from' debe ser un remitente verificado.
     // Usamos CORREO_RECEPTOR como remitente por defecto (sin tocar tu .env).
     const fromEmail = CORREO_RECEPTOR;
@@ -151,6 +157,8 @@ export default class NotificacionAgendamiento {
       return;
     }
 
+    console.log("[MAIL] Enviando a:", to, "| id_reserva:", id_reserva, "| from:", fromEmail);
+
     const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
@@ -167,9 +175,7 @@ export default class NotificacionAgendamiento {
       return;
     }
 
-    // Si quieres debug, descomenta:
-    // const data = await resp.json();
-    // console.log("[MAIL] Enviado OK:", data);
+    console.log("[MAIL] Enviado OK a:", to, "| id_reserva:", id_reserva);
   }
 
   // Envía notificación al equipo cuando un paciente confirma, cancela o agenda una cita
