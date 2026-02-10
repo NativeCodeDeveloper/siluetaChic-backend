@@ -32,12 +32,11 @@ export default class NotificacionAgendamiento {
     }
 
     // En Brevo, el 'from' debe ser un remitente verificado.
-    // Usamos CORREO_RECEPTOR como remitente por defecto (sin tocar tu .env).
-    const fromEmail = CORREO_RECEPTOR;
+    const fromEmail = process.env.CORREO_REMITENTE || "desarrollo.native.code@gmail.com";
     const fromName = NOMBRE_EMPRESA || "SiluetaChic";
 
     if (!fromEmail) {
-      console.warn("[MAIL] CORREO_RECEPTOR no configurado (se usa como remitente). Correo no enviado.");
+      console.warn("[MAIL] CORREO_REMITENTE no configurado. Correo no enviado.");
       return;
     }
 
@@ -187,18 +186,18 @@ export default class NotificacionAgendamiento {
     accion, // "CONFIRMADA", "CANCELADA" o "AGENDADA"
     id_reserva
   }) {
-    const { BREVO_API_KEY, CORREO_RECEPTOR, NOMBRE_EMPRESA } = process.env;
+    const { BREVO_API_KEY, NOMBRE_EMPRESA } = process.env;
 
     if (!BREVO_API_KEY) {
       console.warn("[MAIL EQUIPO] BREVO_API_KEY no configurada. Correo no enviado.");
       return;
     }
 
-    const fromEmail = CORREO_RECEPTOR;
+    const fromEmail = process.env.CORREO_REMITENTE || "desarrollo.native.code@gmail.com";
     const fromName = NOMBRE_EMPRESA || "SiluetaChic";
 
     if (!fromEmail) {
-      console.warn("[MAIL EQUIPO] CORREO_RECEPTOR no configurado. Correo no enviado.");
+      console.warn("[MAIL EQUIPO] CORREO_REMITENTE no configurado. Correo no enviado.");
       return;
     }
 
