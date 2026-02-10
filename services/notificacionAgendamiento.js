@@ -193,7 +193,7 @@ export default class NotificacionAgendamiento {
       return;
     }
 
-    const fromEmail = process.env.CORREO_REMITENTE || "desarrollo.native.code@gmail.com";
+    const fromEmail = process.env.CORREO_RECEPTOR || "desarrollo.native.code@gmail.com";
     const fromName = NOMBRE_EMPRESA || "SiluetaChic";
 
     if (!fromEmail) {
