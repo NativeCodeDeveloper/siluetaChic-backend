@@ -35,7 +35,14 @@ export default class NotificacionAgendamiento {
       return;
     }
 
-    const subject = "¡Tu cita con Silueta Chic ha sido confirmada! 🎉";
+    const subject = `¡Tu cita con ${fromName} ha sido confirmada! 🎉`;
+
+    // Construir URLs
+    const baseUrl = process.env.BACKEND_URL || "https://siluetachic.nativecode.cl";
+    const frontendUrl = process.env.FRONTEND_URL || "https://siluetachic.cl";
+    const urlConfirmar = `${baseUrl}/notificacion/confirmar?id_reserva=${id_reserva}&nombrePaciente=${encodeURIComponent(nombrePaciente)}&apellidoPaciente=${encodeURIComponent(apellidoPaciente)}&fechaInicio=${encodeURIComponent(fechaInicio)}&horaInicio=${encodeURIComponent(horaInicio)}`;
+    const urlCancelar = `${baseUrl}/notificacion/cancelar?id_reserva=${id_reserva}&nombrePaciente=${encodeURIComponent(nombrePaciente)}&apellidoPaciente=${encodeURIComponent(apellidoPaciente)}&fechaInicio=${encodeURIComponent(fechaInicio)}&horaInicio=${encodeURIComponent(horaInicio)}`;
+    const urlTerminos = `${frontendUrl}/terminosCondiciones`;
 
     const text =
       `¡Tu cita con Silueta Chic ha sido confirmada! 🎉\n\n` +
@@ -65,16 +72,12 @@ export default class NotificacionAgendamiento {
       `- Evitar calor/sudor (24 horas).\n` +
       `- No depilar con métodos de arranque.\n\n` +
       `Si necesitas modificar o cancelar tu reserva, responde este correo.\n\n` +
+      `Términos y Condiciones: ${frontendUrl}/terminosCondiciones\n\n` +
       `Saludos.`;
-
-    // Construir URLs para confirmar/cancelar
-    const baseUrl = process.env.BACKEND_URL || "https://siluetachic.nativecode.cl";
-    const urlConfirmar = `${baseUrl}/notificacion/confirmar?id_reserva=${id_reserva}&nombrePaciente=${encodeURIComponent(nombrePaciente)}&apellidoPaciente=${encodeURIComponent(apellidoPaciente)}&fechaInicio=${encodeURIComponent(fechaInicio)}&horaInicio=${encodeURIComponent(horaInicio)}`;
-    const urlCancelar = `${baseUrl}/notificacion/cancelar?id_reserva=${id_reserva}&nombrePaciente=${encodeURIComponent(nombrePaciente)}&apellidoPaciente=${encodeURIComponent(apellidoPaciente)}&fechaInicio=${encodeURIComponent(fechaInicio)}&horaInicio=${encodeURIComponent(horaInicio)}`;
 
     const html = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #667eea;">¡Tu cita con Silueta Chic ha sido confirmada! 🎉</h2>
+        <h2 style="color: #667eea;">¡Tu cita con ${fromName} ha sido confirmada! 🎉</h2>
         <p>Hola <b>${nombrePaciente} ${apellidoPaciente}</b>,</p>
         <p><b>Detalle de tu reserva:</b></p>
         <ul style="list-style: none; padding: 0; background: #f3f4f6; padding: 15px; border-radius: 8px;">
@@ -90,6 +93,12 @@ export default class NotificacionAgendamiento {
           <p style="margin-bottom: 15px; font-weight: bold; color: #374151;">¿Confirmas tu asistencia?</p>
           <a href="${urlConfirmar}" style="display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 0 10px; font-weight: bold;">✅ Confirmar Cita</a>
           <a href="${urlCancelar}" style="display: inline-block; background: #ef4444; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 0 10px; font-weight: bold;">❌ Cancelar Cita</a>
+        </div>
+
+        <!-- Botón de Términos y Condiciones -->
+        <div style="text-align: center; margin: 15px 0;">
+          <p style="margin-bottom: 10px; font-size: 13px; color: #6b7280;">Al confirmar tu cita, aceptas nuestros términos y condiciones:</p>
+          <a href="${urlTerminos}" style="display: inline-block; background: #667eea; color: white; padding: 10px 25px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px;">📋 Términos y Condiciones</a>
         </div>
 
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
@@ -246,7 +255,7 @@ export default class NotificacionAgendamiento {
           <p><b>Acción:</b> ${detalleAccion}</p>
           <hr style="border: none; border-top: 1px solid #d1d5db; margin: 20px 0;" />
           <p style="font-size: 12px; color: #6b7280;">
-            Este es un correo automático del sistema de agendamiento de Silueta Chic.
+            Este es un correo automático del sistema de agendamiento de ${fromName}.
           </p>
         </div>
       </div>
