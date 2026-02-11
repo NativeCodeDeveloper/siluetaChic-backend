@@ -201,4 +201,25 @@ export default class Pacientes {
 
 
 
+
+    //SELECCION DE PACIENTE ESPECIFICO POR RUT
+    async selectPacienteEspecificoPorRut(rut){
+        const conexion = DataBase.getInstance();
+        const query = 'SELECT * FROM pacienteDatos WHERE rut = ? and estado_paciente <> 0';
+        const param = [rut]
+        try {
+            const resultado = await conexion.ejecutarQuery(query, param);
+
+            if (resultado) {
+                return resultado[0]
+
+            }else{
+                return resultado;
+            }
+        } catch (error) {
+            throw new Error('No se puede seleccionar paciente especifico / Problema al establecer la conexion con la base de datos desde la clase Pacientes.js')
+        }
+    }
+
+
 }

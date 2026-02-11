@@ -6,7 +6,7 @@ const router = Router();
 // Rutas para gestión de reservas existentes
 router.get("/seleccionarReservados", ReservaPacienteController.seleccionarReservados);
 router.post("/seleccionarSegunEstado", ReservaPacienteController.seleccionarSegunEstado);
-router.post("/insertarReservaPacienteFicha", ReservaPacienteController.insertarReservaPacienteFicha);
+router.post("/insertarReservaPacienteFicha", ReservaPacienteController.insertarReservaFichaDia);
 router.post("/validar", ReservaPacienteController.validacionDisponibilidad);
 router.post("/insertarReserva", ReservaPacienteController.insertarReservaPaciente);
 router.post("/actualizarEstado", ReservaPacienteController.actualizarEstado);

@@ -23,7 +23,7 @@ export default class FichaClinica {
     // 1. SELECCION DE TODAS LAS FICHAS CLINICAS DE LA BASE DE DATOS
     async selectFicha() {
         const conexion = DataBase.getInstance();
-        const query = 'SELECT * FROM fichaClinica WHERE estadoFicha <> 0';
+        const query = 'SELECT * FROM fichaClinica WHERE estadoFicha <> 0 ORDER BY fechaConsulta DESC';
         try {
             const resultado = await conexion.ejecutarQuery(query);
             if (resultado) {
