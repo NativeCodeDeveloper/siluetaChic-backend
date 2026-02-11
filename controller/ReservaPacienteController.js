@@ -458,115 +458,156 @@ export default class ReservaPacienteController {
             console.log(req.body);
 
             if (!nombrePaciente || !apellidoPaciente || !rut || !telefono || !email || !fechaInicio || !horaInicio || !fechaFinalizacion || !horaFinalizacion || !estadoReserva) {
-                return res.status(400).send({message: "sindata"})
+                return res.status(400).send({message: "sindata"});
             }
 
+            // 1) Validar disponibilidad antes de crear cualquier cosa
+            const claseReservaPaciente = new ReservaPacientes();
+            const validacionHoras = await claseReservaPaciente.validarDisponibilidadBoolean(fechaInicio, horaInicio, fechaFinalizacion, horaFinalizacion);
+            if (!validacionHoras) {
+                return res.status(400).send({message: "conflicto"});
+            }
 
-            let nombre = nombrePaciente;
-            let apellido = apellidoPaciente;
-            let nacimiento = null;
-            let sexo = null;
-            let prevision_id = 0;
-            let correo = null;
-            let direccion = null;
-            let pais = 'chile';
-
-
+            // 2) Insertar/asegurar paciente (si ya existe, el modelo debería marcar duplicado)
+            const nombre = nombrePaciente;
+            const apellido = apellidoPaciente;
+            const nacimiento = null;
+            const sexo = null;
+            const prevision_id = 0;
+            const correo = email; // usar el email real, no null
+            const direccion = null;
+            const pais = "chile";
 
             const clasePacientes = new Pacientes();
-            const respuestaBackendPaciente = await clasePacientes.insertPacientemp(nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais);
+            const respuestaBackendPaciente = await clasePacientes.insertPacientemp(
+                nombre,
+                apellido,
+                rut,
+                nacimiento,
+                sexo,
+                prevision_id,
+                telefono,
+                correo,
+                direccion,
+                pais
+            );
 
-            if (respuestaBackendPaciente.affectedRows > 0) {
+            if (respuestaBackendPaciente?.affectedRows > 0) {
                 console.log("Paciente ingresado correctamente desde reserva");
-
-            }else if (respuestaBackendPaciente.duplicado === true) {
-                console.log("Error al ingresar paciente desde reserva : Paciente ya existe");
-
+            } else if (respuestaBackendPaciente?.duplicado === true) {
+                console.log("Paciente ya existe (OK)");
+            } else {
+                console.log("No se pudo insertar paciente (continuando para intentar obtenerlo por RUT)");
             }
 
-            const claseReservaPaciente = new ReservaPacientes();
+            // 3) Insertar la reserva (primero). Si esto falla, NO generamos ficha.
+            const resultadoQuery = await claseReservaPaciente.insertarReservaPaciente(
+                nombrePaciente,
+                apellidoPaciente,
+                rut,
+                telefono,
+                email,
+                fechaInicio,
+                horaInicio,
+                fechaFinalizacion,
+                horaFinalizacion,
+                estadoReserva
+            );
 
-            const validacionHoras = await claseReservaPaciente.validarDisponibilidadBoolean(fechaInicio, horaInicio, fechaFinalizacion, horaFinalizacion);
+            if (!(resultadoQuery && resultadoQuery.affectedRows > 0)) {
+                return res.status(200).send({message: false});
+            }
 
-            if (!validacionHoras) {
-
-                return res.status(400).send({message: "conflicto"})
-
-
-            } else {
+            // 4) Obtener id_paciente de forma robusta (puede venir array u objeto)
+            let id_paciente = null;
+            try {
                 const pacienteClass = new Pacientes();
-                const seleccionarPacienteData = await pacienteClass.selectPacienteEspecificoPorRut(rut)
-                const id_paciente = seleccionarPacienteData.id_paciente
+                const seleccionarPacienteData = await pacienteClass.selectPacienteEspecificoPorRut(rut);
 
-                if(id_paciente) {
+                if (Array.isArray(seleccionarPacienteData)) {
+                    id_paciente = seleccionarPacienteData[0]?.id_paciente ?? null;
+                } else {
+                    id_paciente = seleccionarPacienteData?.id_paciente ?? null;
+                }
+            } catch (err) {
+                console.error("[PACIENTE] Error obteniendo paciente por RUT:", err.message);
+            }
+
+            // 5) Generar ficha SOLO si tenemos id_paciente
+            if (id_paciente) {
+                try {
                     const fichaClinicaClass = new FichaClinica();
 
+                    const tipoAtencion = "Agendamiento Automatico";
+                    const motivoConsulta = null;
+                    const signosVitales = null;
+                    const observaciones = null;
+                    const anotacionConsulta = "Ficha generada de forma automatica desde el agendamiento";
+                    const anamnesis = null;
+                    const diagnostico = null;
+                    const indicaciones = null;
+                    const archivosAdjuntos = null;
+                    const fechaConsulta = fechaInicio;
+                    const consentimientoFirmado = null;
 
+                    const resultadoInsercionFichaClinica = await fichaClinicaClass.insertarFichaNueva(
+                        id_paciente,
+                        tipoAtencion,
+                        motivoConsulta,
+                        signosVitales,
+                        observaciones,
+                        anotacionConsulta,
+                        anamnesis,
+                        diagnostico,
+                        indicaciones,
+                        archivosAdjuntos,
+                        fechaConsulta,
+                        consentimientoFirmado
+                    );
 
-
-                    const tipoAtencion = 'Agendamiento Automatico';
-                    let motivoConsulta = null;
-                    let signosVitales = null;
-                    const observaciones = 1;
-                    let anotacionConsulta = "Ficha generada de forma automatica desde el agendameinto";
-                    let anamnesis = null;
-                    let diagnostico = null;
-                    let indicaciones = null;
-                    let archivosAdjuntos = null;
-                    let fechaConsulta = fechaInicio;
-                    let consentimientoFirmado = null;
-
-                    const resultadoInsercionFichaClinica = await fichaClinicaClass.insertarFichaNueva(id_paciente, tipoAtencion, motivoConsulta, signosVitales, observaciones, anotacionConsulta, anamnesis, diagnostico, indicaciones, archivosAdjuntos, fechaConsulta, consentimientoFirmado);
-                    if (resultadoInsercionFichaClinica.affectedRows > 0) {
-                        console.log('NUEVA FICHA RANDOM GENERADA CON EXITO');
-
-                    }else{
-                        console.log('NO SE PUDO GENERAR FICHA');
+                    if (resultadoInsercionFichaClinica?.affectedRows > 0) {
+                        console.log("NUEVA FICHA AUTOMATICA GENERADA CON EXITO");
+                    } else {
+                        console.log("NO SE PUDO GENERAR FICHA");
                     }
-
+                } catch (err) {
+                    console.error("[FICHA] Error generando ficha:", err.message);
                 }
-
-
-                const resultadoQuery = await claseReservaPaciente.insertarReservaPaciente(nombrePaciente, apellidoPaciente, rut, telefono, email, fechaInicio, horaInicio, fechaFinalizacion, horaFinalizacion, estadoReserva)
-                if (resultadoQuery.affectedRows > 0) {
-                    // Enviar correo de confirmación al paciente
-                    try {
-                        await NotificacionAgendamiento.enviarCorreoConfirmacionReserva({
-                            to: email,
-                            nombrePaciente,
-                            apellidoPaciente,
-                            rut,
-                            telefono,
-                            fechaInicio,
-                            horaInicio,
-                            fechaFinalizacion,
-                            horaFinalizacion,
-                            estadoReserva,
-                            id_reserva: resultadoQuery.insertId
-                        });
-                    } catch (err) {
-                        console.error("[MAIL] Error:", err.message);
-                    }
-
-                    // Enviar correo de notificación al equipo
-                    NotificacionAgendamiento.enviarCorreoConfirmacionEquipo({
-                        nombrePaciente,
-                        apellidoPaciente,
-                        fechaInicio,
-                        horaInicio,
-                        accion: "AGENDADA",
-                        id_reserva: resultadoQuery.insertId
-                    }).catch(err => {
-                        console.error("[MAIL EQUIPO] Error:", err.message);
-                    });
-
-                    return res.status(200).send({message: true})
-                } else {
-                    return res.status(200).send({message: false})
-                }
-
-
+            } else {
+                console.log("[FICHA] No se generó ficha: no se pudo obtener id_paciente");
             }
+
+            // 6) Correos (no deben romper la respuesta)
+            try {
+                await NotificacionAgendamiento.enviarCorreoConfirmacionReserva({
+                    to: email,
+                    nombrePaciente,
+                    apellidoPaciente,
+                    rut,
+                    telefono,
+                    fechaInicio,
+                    horaInicio,
+                    fechaFinalizacion,
+                    horaFinalizacion,
+                    estadoReserva,
+                    id_reserva: resultadoQuery.insertId
+                });
+            } catch (err) {
+                console.error("[MAIL] Error:", err.message);
+            }
+
+            NotificacionAgendamiento.enviarCorreoConfirmacionEquipo({
+                nombrePaciente,
+                apellidoPaciente,
+                fechaInicio,
+                horaInicio,
+                accion: "AGENDADA",
+                id_reserva: resultadoQuery.insertId
+            }).catch(err => {
+                console.error("[MAIL EQUIPO] Error:", err.message);
+            });
+
+            return res.status(200).send({message: true});
 
         } catch (error) {
             console.error(error);
