@@ -547,7 +547,7 @@ export default class ReservaPacienteController {
                     const diagnostico = null;
                     const indicaciones = null;
                     const archivosAdjuntos = null;
-                    const fechaConsulta = fechaInicio;
+                    const fechaConsulta = fechaFinalizacion;
                     const consentimientoFirmado = null;
 
                     const resultadoInsercionFichaClinica = await fichaClinicaClass.insertarFichaNueva(
@@ -566,7 +566,9 @@ export default class ReservaPacienteController {
                     );
 
                     if (resultadoInsercionFichaClinica?.affectedRows > 0) {
-                        console.log("NUEVA FICHA AUTOMATICA GENERADA CON EXITO");
+                        console.log("NUEVA FICHA AUTOMATICA GENERADA CON EXITO : FECHA : -> " + fechaConsulta);
+                        console.log("fechaConsulta =>", fechaConsulta, typeof fechaConsulta);
+
                     } else {
                         console.log("NO SE PUDO GENERAR FICHA");
                     }
