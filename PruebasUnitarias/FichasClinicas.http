@@ -1,0 +1,19 @@
+### POST request to example server
+POST http://localhost:3001/ficha/editarFichaPaciente
+Content-Type: application/json
+
+{
+  "id_ficha": 45,
+  "estadoFicha": 2,
+  "tipoAtencion": "Control",
+  "motivoConsulta": null,
+  "signosVitales": null,
+  "observaciones": null,
+  "anotacionConsulta": "PRUEBAS DEL BACKEND",
+  "anamnesis": null,
+  "diagnostico": null,
+  "indicaciones": null,
+  "archivosAdjuntos": null,
+  "fechaConsulta": "2026-02-13",
+  "consentimientoFirmado": null
+}

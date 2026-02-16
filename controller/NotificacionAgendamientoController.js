@@ -1,5 +1,7 @@
 import NotificacionAgendamiento from "../services/notificacionAgendamiento.js";
 import ReservaPacientes from "../model/ReservaPacientes.js";
+import FichaClinica from "../model/FichaClinica.js";
+import Pacientes from "../model/Pacientes.js";
 
 export default class NotificacionAgendamientoController {
 
@@ -139,7 +141,37 @@ export default class NotificacionAgendamientoController {
 
       // SOLO enviar correo si la actualización fue exitosa
       if(respuestaBackend && respuestaBackend.affectedRows > 0) {
-          console.log("[CONFIRMAR CITA] Reserva confirmada correctamente. ID:", id_reserva);
+
+
+          const resultadoRut = await reservaPacienteClass.seleccionarRutPorIdReserva(id_reserva);
+          console.log("[CONFIRMAR CITA] Resultado consulta rut:", resultadoRut);
+
+          const rut = resultadoRut[0]?.rut;
+          console.log("[CONFIRMAR CITA] Rut extraído:", rut);
+
+          const PacienteClass = new Pacientes();
+          const arrayObjeto_id_paciente = await PacienteClass.selectPacienteEspecificoPorRut(rut);
+          console.log("[CONFIRMAR CITA] Resultado paciente por rut:", arrayObjeto_id_paciente);
+
+
+          const id_paciente = arrayObjeto_id_paciente?.id_paciente;
+          console.log("[CONFIRMAR CITA] id_paciente extraído:", id_paciente);
+
+          const FichaClinicaClass = new FichaClinica();
+          const arrayObjeto_id_ficha = await FichaClinicaClass.seleccionarId_FichaPorID_paciente(id_paciente);
+          console.log("[CONFIRMAR CITA] Resultado ficha por id_paciente:", arrayObjeto_id_ficha);
+
+
+          const id_ficha = arrayObjeto_id_ficha[0]?.id_ficha;
+          console.log("[CONFIRMAR CITA] id_ficha extraído:", id_ficha);
+
+          if(id_ficha) {
+              const resultadoFicha = await FichaClinicaClass.actualizarEstadoFicha(2, id_ficha);
+              console.log("[CONFIRMAR CITA] Resultado actualizar ficha:", resultadoFicha);
+          } else {
+              console.log("[CONFIRMAR CITA] No se encontró id_ficha, no se actualizó ficha");
+          }
+
 
           // Enviar correo de confirmación al equipo SOLO si se actualizó correctamente
           await NotificacionAgendamiento.enviarCorreoConfirmacionEquipo({
@@ -407,10 +439,33 @@ export default class NotificacionAgendamientoController {
       const reservaPacienteClass = new ReservaPacientes();
       const estadoReserva = "ANULADA";
       const respuestaBackend = await reservaPacienteClass.actualizarEstado(estadoReserva, id_reserva);
-
       // SOLO enviar correo si la actualización fue exitosa
       if(respuestaBackend && respuestaBackend.affectedRows > 0) {
           console.log("[ANULAR CITA] Reserva ANULADA correctamente. ID:", id_reserva);
+
+          const resultadoRut = await reservaPacienteClass.seleccionarRutPorIdReserva(id_reserva);
+          console.log("[ANULAR CITA] Resultado consulta rut:", resultadoRut);
+          const rut = resultadoRut[0]?.rut;
+          console.log("[ANULAR CITA] Rut extraído:", rut);
+
+          const PacienteClass = new Pacientes();
+          const arrayObjeto_id_paciente = await PacienteClass.selectPacienteEspecificoPorRut(rut);
+          console.log("[ANULAR CITA] Resultado paciente por rut:", arrayObjeto_id_paciente);
+          const id_paciente = arrayObjeto_id_paciente?.id_paciente;
+          console.log("[ANULAR CITA] id_paciente extraído:", id_paciente);
+
+          const FichaClinicaClass = new FichaClinica();
+          const arrayObjeto_id_ficha = await FichaClinicaClass.seleccionarId_FichaPorID_paciente(id_paciente);
+          console.log("[ANULAR CITA] Resultado ficha por id_paciente:", arrayObjeto_id_ficha);
+          const id_ficha = arrayObjeto_id_ficha[0]?.id_ficha;
+          console.log("[ANULAR CITA] id_ficha extraído:", id_ficha);
+
+          if (id_ficha) {
+              const resultadoFicha = await FichaClinicaClass.actualizarEstadoFicha(3, id_ficha);
+              console.log("[ANULAR CITA] Resultado actualizar ficha:", resultadoFicha);
+          } else {
+              console.log("[ANULAR CITA] No se encontró id_ficha, no se actualizó ficha");
+          }
 
           // Enviar correo de cancelación al equipo SOLO si se actualizó correctamente
           await NotificacionAgendamiento.enviarCorreoConfirmacionEquipo({

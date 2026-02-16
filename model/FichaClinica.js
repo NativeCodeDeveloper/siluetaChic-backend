@@ -128,4 +128,74 @@ export default class FichaClinica {
     }
 
 
+
+
+
+    // 4. ACTUALIZACION DE DATOS DE LA FICHA DE PACIENTES POR POR ID
+    async updateFichaEspecificaConEstado(
+        estadoFicha,
+        tipoAtencion,
+        motivoConsulta,
+        signosVitales,
+        observaciones,
+        anotacionConsulta,
+        anamnesis,
+        diagnostico,
+        indicaciones,
+        archivosAdjuntos,
+        fechaConsulta,
+        consentimientoFirmado,
+        id_ficha) {
+        const conexion = DataBase.getInstance();
+        const query = 'UPDATE fichaClinica SET estadoFicha = ?, tipoAtencion = ?, motivoConsulta = ?, signosVitales = ?, observaciones = ?, anotacionConsulta = ?, anamnesis = ?, diagnostico = ?, indicaciones = ?, archivosAdjuntos = ?, fechaConsulta = ?, consentimientoFirmado = ? WHERE id_ficha = ?';
+        const param = [estadoFicha, tipoAtencion, motivoConsulta, signosVitales, observaciones, anotacionConsulta, anamnesis, diagnostico, indicaciones, archivosAdjuntos, fechaConsulta,
+            consentimientoFirmado, id_ficha];
+        try {
+            const resultado = await conexion.ejecutarQuery(query, param);
+            if (resultado) {
+                return resultado;
+            }
+        } catch (error) {
+            throw new Error('NO se logro actualizar FichaEspecifica / Problema al establecer la conexion con la base de datos desde la clase Pacientes.js')
+        }
+    }
+
+
+
+    // 4. ACTUALIZACION DE ESTADO ESPECIFICO DE LA FICHA DE PACIENTES POR POR ID DE CADA FICHA
+    async actualizarEstadoFicha(estadoFicha, id_ficha) {
+        const conexion = DataBase.getInstance();
+        const query = 'UPDATE fichaClinica SET estadoFicha = ? WHERE id_ficha = ?';
+        const param = [estadoFicha, id_ficha];
+        try {
+            const resultado = await conexion.ejecutarQuery(query, param);
+            if (resultado) {
+                return resultado;
+            }
+        } catch (error) {
+            throw new Error('NO se logro actualizar estado de la FichaEspecifica / Problema al establecer la conexion con la base de datos desde la clase Pacientes.js')
+        }
+    }
+
+
+
+
+
+
+    // 4. ACTUALIZACION DE ESTADO ESPECIFICO DE LA FICHA DE PACIENTES POR POR ID DE CADA FICHA
+    async seleccionarId_FichaPorID_paciente(id_paciente) {
+        const conexion = DataBase.getInstance();
+        const query = 'SELECT id_ficha FROM fichaClinica WHERE id_paciente = ?';
+        const param = [id_paciente];
+        try {
+            const resultado = await conexion.ejecutarQuery(query, param);
+            if (resultado) {
+                return resultado;
+            }
+        } catch (error) {
+            throw new Error('NO se logro actualizar estado de la FichaEspecifica / Problema al establecer la conexion con la base de datos desde la clase Pacientes.js')
+        }
+    }
+
+
 }

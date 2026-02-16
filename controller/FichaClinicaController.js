@@ -82,7 +82,6 @@ export default class FichaClinicaController {
     //4. FUNCION PARA INSERTAR UNA NUEVA FICHA CLINICA EN UN PACIENTE ESPECIFICO (USANDO EL ID PACIENTE)
     static async insertarNuevaFichaPaciente(req, res) {
         try {
-
             const {
                 id_paciente,
                 tipoAtencion,
@@ -204,6 +203,98 @@ export default class FichaClinicaController {
             })
         }
     }
+
+
+
+
+
+    //8. FUNCION CONTROLLER PARA EDITAR LOS DATOS DE LOS PACIENTES y EL ESTADO
+
+    static async editarFichaPacienteEstado(req, res) {
+        try {
+            const {
+                estadoFicha,
+                tipoAtencion,
+                motivoConsulta,
+                signosVitales,
+                observaciones,
+                anotacionConsulta,
+                anamnesis,
+                diagnostico,
+                indicaciones,
+                archivosAdjuntos,
+                fechaConsulta,
+                consentimientoFirmado,
+                id_ficha
+            } = req.body;
+
+            console.log(req.body);
+
+            if (!id_ficha) {
+                return res.status(400).json({message: "sindato"});
+            }
+
+            const fichaclinicamodel = new FichaClinica();
+            const resultadoQuery = await fichaclinicamodel.updateFichaEspecificaConEstado(estadoFicha, tipoAtencion, motivoConsulta, signosVitales, observaciones, anotacionConsulta,
+                anamnesis, diagnostico, indicaciones, archivosAdjuntos, fechaConsulta, consentimientoFirmado, id_ficha)
+            if (resultadoQuery.affectedRows > 0) {
+                return res.status(200).json({message: true});
+            } else {
+                return res.status(404).json({message: false});
+            }
+        } catch (error) {
+            return res.status(500).json({message: "No se ha podido realizar la consulta desde FichaClinicaController / Contacte al equipo de soporte"});
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    //8. FUNCION CONTROLLER PARA EDITAR LOS DATOS DE LOS PACIENTES y EL ESTADO
+
+    static async editarFichaPacienteEstado(req, res) {
+        try {
+            const {
+                estadoFicha,
+                tipoAtencion,
+                motivoConsulta,
+                signosVitales,
+                observaciones,
+                anotacionConsulta,
+                anamnesis,
+                diagnostico,
+                indicaciones,
+                archivosAdjuntos,
+                fechaConsulta,
+                consentimientoFirmado,
+                id_ficha
+            } = req.body;
+
+            console.log(req.body);
+
+            if (!id_ficha) {
+                return res.status(400).json({message: "sindato"});
+            }
+
+            const fichaclinicamodel = new FichaClinica();
+            const resultadoQuery = await fichaclinicamodel.updateFichaEspecificaConEstado(estadoFicha, tipoAtencion, motivoConsulta, signosVitales, observaciones, anotacionConsulta,
+                anamnesis, diagnostico, indicaciones, archivosAdjuntos, fechaConsulta, consentimientoFirmado, id_ficha)
+            if (resultadoQuery.affectedRows > 0) {
+                return res.status(200).json({message: true});
+            } else {
+                return res.status(404).json({message: false});
+            }
+        } catch (error) {
+            return res.status(500).json({message: "No se ha podido realizar la consulta desde FichaClinicaController / Contacte al equipo de soporte"});
+        }
+    }
+
 
 
 }

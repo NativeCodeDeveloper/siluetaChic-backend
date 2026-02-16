@@ -2,6 +2,7 @@ import DataBase from "../config/Database.js";
 
 
 export default class ReservaPacientes {
+
     constructor(
         id_reserva,
         nombrePaciente,
@@ -288,4 +289,28 @@ export default class ReservaPacientes {
         }
 
     }
+
+
+
+
+
+
+
+    async seleccionarRutPorIdReserva(id_reserva) {
+        try {
+            const conexion = DataBase.getInstance();
+            const query = 'SELECT rut FROM reservaPacientes WHERE id_reserva = ?';
+            const param = [id_reserva];
+
+            const resultadoQuery = await conexion.ejecutarQuery(query, param);
+
+            if (resultadoQuery) {
+                return resultadoQuery;
+            }
+        } catch (error) {
+            console.log(error);
+
+        }
+    }
+
 }

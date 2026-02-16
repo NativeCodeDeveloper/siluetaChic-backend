@@ -542,7 +542,7 @@ export default class ReservaPacienteController {
                     const motivoConsulta = null;
                     const signosVitales = null;
                     const observaciones = null;
-                    const anotacionConsulta = "Ficha generada de forma automatica desde el agendamiento";
+                    const anotacionConsulta = `Hora de Agendamiento: ${horaInicio} - ${horaFinalizacion}`;
                     const anamnesis = null;
                     const diagnostico = null;
                     const indicaciones = null;
