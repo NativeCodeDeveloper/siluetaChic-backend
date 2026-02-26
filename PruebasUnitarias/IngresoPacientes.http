@@ -1,0 +1,85 @@
+### Seleccionar todos los pacientes
+GET http://localhost:3001/pacientes/
+
+###
+
+### Seleccionar paciente especifico por ID
+POST http://localhost:3001/pacientes/pacientesEspecifico
+Content-Type: application/json
+
+{
+  "id_paciente": 1
+}
+
+###
+
+### Buscar paciente por RUT (coincidencia parcial)
+POST http://localhost:3001/pacientes/contieneRut
+Content-Type: application/json
+
+{
+  "rut": "12345"
+}
+
+###
+
+### Buscar paciente por nombre (coincidencia parcial)
+POST http://localhost:3001/pacientes/contieneNombre
+Content-Type: application/json
+
+{
+  "nombre": "Juan"
+}
+
+###
+
+### Insertar paciente nuevo
+POST http://localhost:3001/pacientes/pacientesInsercion
+Content-Type: application/json
+
+{
+  "nombre": "Juan",
+  "apellido": "Perez",
+  "rut": "12345678-9",
+  "nacimiento": "1990-05-15",
+  "sexo": "M",
+  "prevision_id": 1,
+  "telefono": "912345678",
+  "correo": "juan.perez@correo.com",
+  "direccion": "Av. Principal 123",
+  "pais": "Chile",
+  "observacion1": "Paciente con alergia a penicilina"
+}
+
+###
+
+### Actualizar paciente
+POST http://localhost:3001/pacientes/pacientesActualizar
+Content-Type: application/json
+
+{
+  "nombre": "Juan",
+  "apellido": "Perez",
+  "rut": "12345678-9",
+  "nacimiento": "1990-05-15",
+  "sexo": "M",
+  "prevision_id": 1,
+  "telefono": "987654321",
+  "correo": "juan.actualizado@correo.com",
+  "direccion": "Calle Nueva 456",
+  "pais": "Chile",
+  "observaciones": "Actualizacion de observaciones del paciente",
+  "id_paciente": 1
+}
+
+###
+
+### Eliminar paciente (eliminacion logica)
+POST http://localhost:3001/pacientes/eliminarPaciente
+Content-Type: application/json
+
+{
+  "id_paciente": 1
+}
+
+###

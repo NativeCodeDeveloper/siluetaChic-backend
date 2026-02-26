@@ -105,14 +105,14 @@ export default class PacienteController {
 
     static async insertarPacienteNuevo(req, res){
         try {
-            const {nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais} = req.body;
+            const {nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais,observaciones} = req.body;
             console.log(req.body)
 
             if (!nombre || !apellido || !rut || !nacimiento || !sexo || !prevision_id || !telefono || !correo || !direccion || !pais) {
                 return res.status(400).json({message : 'Faltan datos obligatorios en el body'})
             }
             const paciente = new Paciente();
-            const resultado = await paciente.insertPaciente(nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais);
+            const resultado = await paciente.insertPaciente(nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais,observaciones);
             if (resultado.affectedRows > 0) {
                 res.status(200).json({message: true})
             }else{
@@ -132,13 +132,13 @@ export default class PacienteController {
 
     static async actualizarPaciente(req, res){
         try {
-            const {nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais,id_paciente } = req.body;
+            const {nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais,observaciones,id_paciente } = req.body;
             console.log(req.body)
             if (!nombre || !apellido || !rut || !nacimiento || !sexo || !prevision_id || !telefono || !correo || !direccion || !pais || !id_paciente) {
                 return res.status(400).json({message : 'sindato'})
             }
             const paciente = new Paciente();
-            const resultado = await paciente.updatePaciente(nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais,id_paciente);
+            const resultado = await paciente.updatePaciente(nombre,apellido,rut,nacimiento,sexo,prevision_id,telefono,correo,direccion,pais,observaciones,id_paciente);
             if (resultado) {
                 return res.json({message: true})
             }else{
