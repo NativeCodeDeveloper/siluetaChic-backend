@@ -130,7 +130,7 @@ export default class ReservaPacientes {
     async seleccionarFichasReservadas() {
         try {
             const conexion = DataBase.getInstance();
-            const query = "SELECT * FROM reservaPacientes WHERE estadoPeticion <> 0"
+            const query = "SELECT rp.*, pd.id_paciente FROM reservaPacientes rp LEFT JOIN pacienteDatos pd ON rp.rut = pd.rut COLLATE utf8mb4_general_ci WHERE rp.estadoPeticion <> 0"
             const resultadoQuery = await conexion.ejecutarQuery(query);
             if (resultadoQuery) {
                 return resultadoQuery;
