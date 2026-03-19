@@ -58,6 +58,10 @@ export default class ProductoController {
         descripcionProducto,
         valorProducto,
           valor_previo,
+          precio_3_sesiones,
+          precio_6_sesiones,
+          valor_previo_3_sesiones,
+          valor_previo_6_sesiones,
         categoriaProducto,
           subcategoria,
           subsubcategoria,
@@ -69,17 +73,23 @@ export default class ProductoController {
         id_producto
       } = req.body;
 
+      // subsubcategoria obligatoria solo para productos que NO son pack
+      const esPack = precio_3_sesiones != null && precio_3_sesiones !== '';
+
       if (!tituloProducto ||
         !descripcionProducto ||
         !valorProducto ||
           !valor_previo ||
           !categoriaProducto ||
           !subcategoria ||
-          !subsubcategoria ||
           !especificacionProducto||
         !imagenProducto||
         !id_producto
       ) {
+        return res.status(400).json({ message: "sindato" });
+      }
+
+      if (!esPack && !subsubcategoria) {
         return res.status(400).json({ message: "sindato" });
       }
 
@@ -89,9 +99,13 @@ export default class ProductoController {
           descripcionProducto,
           valorProducto,
           valor_previo,
+          esPack ? Number(precio_3_sesiones) : null,
+          esPack ? Number(precio_6_sesiones) : null,
+          esPack ? Number(valor_previo_3_sesiones) : null,
+          esPack ? Number(valor_previo_6_sesiones) : null,
           categoriaProducto,
           subcategoria,
-          subsubcategoria,
+          subsubcategoria || null,
           imagenProducto,
           imagenProductoSegunda,
           imagenProductoTercera,
@@ -129,6 +143,10 @@ export default class ProductoController {
           descripcionProducto,
           valorProducto,
           valor_previo,
+          precio_3_sesiones,
+          precio_6_sesiones,
+          valor_previo_3_sesiones,
+          valor_previo_6_sesiones,
           categoriaProducto,
           subcategoria,
           subsubcategoria,
@@ -139,7 +157,16 @@ export default class ProductoController {
           especificacionProducto
       } = req.body;
 
-      if (!tituloProducto || !descripcionProducto || !valorProducto || !valor_previo || !categoriaProducto ||!subcategoria || !subsubcategoria || !imagenProducto) {
+      if (!tituloProducto || !descripcionProducto || !valorProducto || !valor_previo || !categoriaProducto ||!subcategoria || !imagenProducto) {
+        return res.status(400).json({ message: "sindato" });
+      }
+
+      // subsubcategoria obligatoria solo para productos que NO son pack
+      const esPack = precio_3_sesiones != null && precio_3_sesiones !== '';
+      if (!esPack && !subsubcategoria) {
+        return res.status(400).json({ message: "sindato" });
+      }
+      if (esPack && (!precio_6_sesiones || !valor_previo_3_sesiones || !valor_previo_6_sesiones)) {
         return res.status(400).json({ message: "sindato" });
       }
 
@@ -149,9 +176,13 @@ export default class ProductoController {
           descripcionProducto,
           valorProducto,
           valor_previo,
+          esPack ? Number(precio_3_sesiones) : null,
+          esPack ? Number(precio_6_sesiones) : null,
+          esPack ? Number(valor_previo_3_sesiones) : null,
+          esPack ? Number(valor_previo_6_sesiones) : null,
           categoriaProducto,
           subcategoria,
-          subsubcategoria,
+          subsubcategoria || null,
           imagenProducto,
           imagenProductoSegunda,
           imagenProductoTercera,

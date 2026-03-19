@@ -69,6 +69,10 @@ export default class Producto {
       descripcionProducto,
       valorProducto,
       valor_previo,
+      precio_3_sesiones,
+      precio_6_sesiones,
+      valor_previo_3_sesiones,
+      valor_previo_6_sesiones,
       categoriaProducto,
       subcategoria,
       subsubcategoria,
@@ -80,13 +84,17 @@ export default class Producto {
       id_producto
   ){
     const conexion = DataBase.getInstance();
-    const query = 'UPDATE productos SET tituloProducto = ? , descripcionProducto = ?, valorProducto = ? , valor_previo = ?, categoriaProducto = ?, subcategoria = ?, subsubcategoria = ?, imagenProducto = ? ,imagenProductoSegunda = ?, imagenProductoTercera = ?,  imagenProductoCuarta = ?, especificacionProducto = ? where id_producto = ? ';
+    const query = 'UPDATE productos SET tituloProducto = ? , descripcionProducto = ?, valorProducto = ? , valor_previo = ?, precio_3_sesiones = ?, precio_6_sesiones = ?, valor_previo_3_sesiones = ?, valor_previo_6_sesiones = ?, categoriaProducto = ?, subcategoria = ?, subsubcategoria = ?, imagenProducto = ? ,imagenProductoSegunda = ?, imagenProductoTercera = ?,  imagenProductoCuarta = ?, especificacionProducto = ? where id_producto = ? ';
 
     const param = [
         tituloProducto,
         descripcionProducto,
         valorProducto,
         valor_previo,
+        precio_3_sesiones,
+        precio_6_sesiones,
+        valor_previo_3_sesiones,
+        valor_previo_6_sesiones,
         categoriaProducto,
         subcategoria,
         subsubcategoria,
@@ -112,10 +120,10 @@ try {
 
 
 // INSERCION DE NUEVO PRODUCTO EN LA BASE DE DATOS
-  async insertProducto(tituloProducto, descripcionProducto, valorProducto, valor_previo, categoriaProducto, subcategoria, subsubcategoria, imagenProducto, imagenProductoSegunda, imagenProductoTercera, imagenProductoCuarta, especificacionProducto){
+  async insertProducto(tituloProducto, descripcionProducto, valorProducto, valor_previo, precio_3_sesiones, precio_6_sesiones, valor_previo_3_sesiones, valor_previo_6_sesiones, categoriaProducto, subcategoria, subsubcategoria, imagenProducto, imagenProductoSegunda, imagenProductoTercera, imagenProductoCuarta, especificacionProducto){
     const conexion = DataBase.getInstance();
-    const query = 'INSERT INTO productos (tituloProducto,descripcionProducto, valorProducto, valor_previo, categoriaProducto, subcategoria, subsubcategoria, imagenProducto,imagenProductoSegunda,imagenProductoTercera,imagenProductoCuarta, especificacionProducto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    const param = [tituloProducto, descripcionProducto, valorProducto, valor_previo, categoriaProducto, subcategoria, subsubcategoria, imagenProducto, imagenProductoSegunda, imagenProductoTercera, imagenProductoCuarta, especificacionProducto];
+    const query = 'INSERT INTO productos (tituloProducto, descripcionProducto, valorProducto, valor_previo, precio_3_sesiones, precio_6_sesiones, valor_previo_3_sesiones, valor_previo_6_sesiones, categoriaProducto, subcategoria, subsubcategoria, imagenProducto, imagenProductoSegunda, imagenProductoTercera, imagenProductoCuarta, especificacionProducto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    const param = [tituloProducto, descripcionProducto, valorProducto, valor_previo, precio_3_sesiones, precio_6_sesiones, valor_previo_3_sesiones, valor_previo_6_sesiones, categoriaProducto, subcategoria, subsubcategoria, imagenProducto, imagenProductoSegunda, imagenProductoTercera, imagenProductoCuarta, especificacionProducto];
 try {
     const resultado = await conexion.ejecutarQuery(query,param);
     const filasAfectadas = resultado.affectedRows;
