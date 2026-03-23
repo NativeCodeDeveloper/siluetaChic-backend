@@ -192,6 +192,37 @@ export default class ReservaPacienteController {
             const resultadoQuery = await claseReservaPaciente.actualizarReserva(nombrePaciente, apellidoPaciente, rut, telefono, email, fechaInicio, horaInicio, fechaFinalizacion, horaFinalizacion, estadoReserva, id_reserva);
 
             if (resultadoQuery.affectedRows > 0) {
+                // Enviar correo de modificación al paciente
+                try {
+                    await NotificacionAgendamiento.enviarCorreoModificacionReserva({
+                        to: email,
+                        nombrePaciente,
+                        apellidoPaciente,
+                        rut,
+                        telefono,
+                        fechaInicio,
+                        horaInicio,
+                        fechaFinalizacion,
+                        horaFinalizacion,
+                        estadoReserva,
+                        id_reserva
+                    });
+                } catch (err) {
+                    console.error("[MAIL] Error al enviar correo de modificación al paciente:", err.message);
+                }
+
+                // Enviar notificación al equipo
+                NotificacionAgendamiento.enviarCorreoConfirmacionEquipo({
+                    nombrePaciente,
+                    apellidoPaciente,
+                    fechaInicio,
+                    horaInicio,
+                    accion: "MODIFICADA",
+                    id_reserva
+                }).catch(err => {
+                    console.error("[MAIL EQUIPO] Error al enviar correo de modificación:", err.message);
+                });
+
                 return res.status(200).json({message: true});
             } else {
                 return res.status(200).json({message: false});
