@@ -197,5 +197,31 @@ export default class FichaClinica {
         }
     }
 
+    async seleccionarFichaAutomaticaPorPacienteYAgenda(id_paciente, fechaConsulta, anotacionConsulta) {
+        const conexion = DataBase.getInstance();
+        const query = `
+            SELECT *
+            FROM fichaClinica
+            WHERE id_paciente = ?
+              AND tipoAtencion = 'Agendamiento Automatico'
+              AND fechaConsulta = ?
+              AND anotacionConsulta = ?
+              AND estadoFicha <> 0
+            ORDER BY id_ficha DESC
+            LIMIT 1
+        `;
+        const param = [id_paciente, fechaConsulta, anotacionConsulta];
+
+        try {
+            const resultado = await conexion.ejecutarQuery(query, param);
+            if (Array.isArray(resultado)) {
+                return resultado[0] ?? null;
+            }
+            return resultado ?? null;
+        } catch (error) {
+            throw new Error('No se logró seleccionar la ficha automática del agendamiento / Problema al establecer la conexión con la base de datos desde la clase FichaClinica.js')
+        }
+    }
+
 
 }

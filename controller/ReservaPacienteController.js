@@ -189,9 +189,55 @@ export default class ReservaPacienteController {
             }
 
             const claseReservaPaciente = new ReservaPacientes();
+            const reservaAnteriorArray = await claseReservaPaciente.seleccionarFichasReservadasEspecifica(id_reserva);
+            const reservaAnterior = Array.isArray(reservaAnteriorArray) ? reservaAnteriorArray[0] : reservaAnteriorArray;
+
             const resultadoQuery = await claseReservaPaciente.actualizarReserva(nombrePaciente, apellidoPaciente, rut, telefono, email, fechaInicio, horaInicio, fechaFinalizacion, horaFinalizacion, estadoReserva, id_reserva);
 
             if (resultadoQuery.affectedRows > 0) {
+                if (reservaAnterior?.rut) {
+                    try {
+                        const pacienteClass = new Pacientes();
+                        const fichaClinicaClass = new FichaClinica();
+                        const pacienteAnterior = await pacienteClass.selectPacienteEspecificoPorRut(reservaAnterior.rut);
+                        const id_paciente = pacienteAnterior?.id_paciente ?? null;
+
+                        if (id_paciente) {
+                            const anotacionAnterior = `Hora de Agendamiento: ${reservaAnterior.horaInicio} - ${reservaAnterior.horaFinalizacion}`;
+                            const fichaAutomatica = await fichaClinicaClass.seleccionarFichaAutomaticaPorPacienteYAgenda(
+                                id_paciente,
+                                reservaAnterior.fechaFinalizacion,
+                                anotacionAnterior
+                            );
+
+                            if (fichaAutomatica?.id_ficha) {
+                                const nuevaAnotacion = `Hora de Agendamiento: ${horaInicio} - ${horaFinalizacion}`;
+
+                                await fichaClinicaClass.updateFichaEspecifica(
+                                    fichaAutomatica.tipoAtencion,
+                                    fichaAutomatica.motivoConsulta,
+                                    fichaAutomatica.signosVitales,
+                                    fichaAutomatica.observaciones,
+                                    nuevaAnotacion,
+                                    fichaAutomatica.anamnesis,
+                                    fichaAutomatica.diagnostico,
+                                    fichaAutomatica.indicaciones,
+                                    fichaAutomatica.archivosAdjuntos,
+                                    fechaFinalizacion,
+                                    fichaAutomatica.consentimientoFirmado,
+                                    fichaAutomatica.id_ficha
+                                );
+                            } else {
+                                console.log(`[FICHA] No se encontró ficha automática para sincronizar reserva ${id_reserva}`);
+                            }
+                        } else {
+                            console.log(`[FICHA] No se encontró paciente para sincronizar ficha de la reserva ${id_reserva}`);
+                        }
+                    } catch (err) {
+                        console.error("[FICHA] Error al sincronizar ficha clínica tras reagendamiento:", err.message);
+                    }
+                }
+
                 // Enviar correo de modificación al paciente
                 try {
                     await NotificacionAgendamiento.enviarCorreoModificacionReserva({
