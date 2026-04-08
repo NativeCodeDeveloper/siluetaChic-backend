@@ -313,4 +313,31 @@ export default class ReservaPacientes {
         }
     }
 
+
+    // NUEVO: usado solo por SincronizacionAsistenciaController para emparejar
+    // una ficha automatica con su reserva original (rut + fecha + horarios).
+    // Usa DATE() para evitar falsos negativos por formatos datetime/ISO.
+    async seleccionarReservaPorRutFechaHorario(rut, fechaFinalizacion, horaInicio, horaFinalizacion) {
+        const conexion = DataBase.getInstance();
+        const query = `
+            SELECT *
+            FROM reservaPacientes
+            WHERE rut = ?
+              AND DATE(fechaFinalizacion) = DATE(?)
+              AND horaInicio = ?
+              AND horaFinalizacion = ?
+              AND estadoPeticion <> 0
+            ORDER BY id_reserva DESC
+            LIMIT 1
+        `;
+        const param = [rut, fechaFinalizacion, horaInicio, horaFinalizacion];
+        try {
+            const resultado = await conexion.ejecutarQuery(query, param);
+            if (Array.isArray(resultado)) return resultado[0] ?? null;
+            return resultado ?? null;
+        } catch (error) {
+            throw new Error('No se pudo buscar reserva por rut/fecha/horario / Problema desde ReservaPacientes.js');
+        }
+    }
+
 }

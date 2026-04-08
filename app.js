@@ -20,6 +20,7 @@ import carruselPortadaRoutes from "./view/carruselPortadaRoutes.js";
 import subSubCategoriaRoutes from "./view/subSubCategoriaRoutes.js";
 import especificacionProductoRoutes from "./view/especificacionProductoRoutes.js";
 import notificacionAgendamientoRoutes from "./view/notificacionAgendamientoRoutes.js";
+import sincronizacionAsistenciaRoutes from "./view/sincronizacionAsistenciaRoutes.js";
 import { ejecutarRecordatoriosAutomaticos } from "./services/notificacionPreviaDia.js";
 
 
@@ -57,6 +58,7 @@ app.use("/subcategorias", subCategoriasRoutes);
 app.use("/publicaciones", publicacionesRoutes);
 app.use('/contacto', contactoRouter );
 app.use('/notificacion', notificacionAgendamientoRoutes);
+app.use('/sincronizacionAsistencia', sincronizacionAsistenciaRoutes);
 
 // Ruta para ejecutar recordatorios manualmente (útil para testing)
 app.get('/recordatorios/ejecutar', async (req, res) => {
