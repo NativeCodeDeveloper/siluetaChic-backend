@@ -66,7 +66,7 @@ export default class Pacientes {
     //SELECCION DE PACIENTE POR -----> RUT %PARECIDO% <------
     async PacienteParecidoRut(rut){
         const conexion = DataBase.getInstance();
-        const query = 'SELECT * FROM pacienteDatos WHERE rut LIKE ?';
+        const query = 'SELECT * FROM pacienteDatos WHERE rut LIKE ? AND estado_paciente <> 0';
         const param = [`%${rut}%`]
         try {
             const resultado = await conexion.ejecutarQuery(query, param);
@@ -85,7 +85,7 @@ export default class Pacientes {
     //SELECCION DE PACIENTE POR -----> NOMBRE %PARECIDO% <------
     async PacienteParecidoNombre(nombre){
         const conexion = DataBase.getInstance();
-        const query = 'SELECT * FROM pacienteDatos WHERE nombre LIKE ?';
+        const query = 'SELECT * FROM pacienteDatos WHERE nombre LIKE ? AND estado_paciente <>0';
         const param = [`%${nombre}%`]
         try {
             const resultado = await conexion.ejecutarQuery(query, param);
