@@ -12,11 +12,64 @@ import DataBase from '../config/Database.js';
 
 const DIRECCION_CLINICA = "SILUETA CHIC, Avenida Irarrázaval 1989 OF 204 SUR, Ñuñoa, Santiago, Chile";
 
+let columnasVerificadas = false;
+
+async function obtenerContextoHorarioMySQL() {
+  try {
+    const conexion = DataBase.getInstance();
+    const rows = await conexion.ejecutarQuery(`
+      SELECT
+        NOW() AS ahora_mysql,
+        @@session.time_zone AS session_time_zone,
+        @@global.time_zone AS global_time_zone
+    `);
+
+    return Array.isArray(rows) ? rows[0] : null;
+  } catch (error) {
+    console.error("[RECORDATORIO] Error al obtener contexto horario MySQL:", error.message);
+    return null;
+  }
+}
+
+/**
+ * Verifica y crea las columnas recordatorio12h y recordatorio6h si no existen
+ */
+async function asegurarColumnasRecordatorio() {
+  if (columnasVerificadas) return true;
+
+  try {
+    const conexion = DataBase.getInstance();
+    const columnas = await conexion.ejecutarQuery(
+      `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'reservaPacientes'
+       AND COLUMN_NAME IN ('recordatorio12h', 'recordatorio6h')`
+    );
+
+    const existentes = Array.isArray(columnas) ? columnas.map(c => c.COLUMN_NAME) : [];
+
+    if (!existentes.includes('recordatorio12h')) {
+      await conexion.ejecutarQuery(`ALTER TABLE reservaPacientes ADD COLUMN recordatorio12h TINYINT(1) DEFAULT 0`);
+      console.log("[RECORDATORIO] Columna recordatorio12h creada exitosamente.");
+    }
+
+    if (!existentes.includes('recordatorio6h')) {
+      await conexion.ejecutarQuery(`ALTER TABLE reservaPacientes ADD COLUMN recordatorio6h TINYINT(1) DEFAULT 0`);
+      console.log("[RECORDATORIO] Columna recordatorio6h creada exitosamente.");
+    }
+
+    columnasVerificadas = true;
+    return true;
+  } catch (error) {
+    console.error("[RECORDATORIO] ERROR al verificar/crear columnas:", error.message);
+    return false;
+  }
+}
+
 /**
  * Envía el correo de recordatorio usando Brevo API
  */
 async function enviarCorreoRecordatorio({ email, nombrePaciente, apellidoPaciente, fecha, hora, tipoRecordatorio }) {
-  const { BREVO_API_KEY, CORREO_RECEPTOR, NOMBRE_EMPRESA } = process.env;
+  const { BREVO_API_KEY, CORREO_REMITENTE, NOMBRE_EMPRESA } = process.env;
 
   if (!BREVO_API_KEY) {
     console.warn("[RECORDATORIO] BREVO_API_KEY no configurada. Correo no enviado.");
@@ -28,11 +81,11 @@ async function enviarCorreoRecordatorio({ email, nombrePaciente, apellidoPacient
     return false;
   }
 
-  const fromEmail = CORREO_RECEPTOR;
+  const fromEmail = CORREO_REMITENTE;
   const fromName = NOMBRE_EMPRESA || "SiluetaChic";
 
   if (!fromEmail) {
-    console.warn("[RECORDATORIO] CORREO_RECEPTOR no configurado. Correo no enviado.");
+    console.warn("[RECORDATORIO] CORREO_REMITENTE no configurado. Correo no enviado.");
     return false;
   }
 
@@ -212,7 +265,7 @@ async function obtenerReservasParaRecordatorio() {
         COALESCE(recordatorio6h, 0) as recordatorio6h,
         TIMESTAMPDIFF(MINUTE, NOW(), TIMESTAMP(fechaInicio, horaInicio)) as minutos_restantes
       FROM reservaPacientes 
-      WHERE estadoReserva IN ('reservada', 'CONFIRMADA')
+      WHERE estadoReserva IN ('reservada', 'confirmada')
         AND estadoPeticion <> 0
         AND TIMESTAMP(fechaInicio, horaInicio) > NOW()
         AND TIMESTAMP(fechaInicio, horaInicio) <= DATE_ADD(NOW(), INTERVAL 13 HOUR)
@@ -222,6 +275,38 @@ async function obtenerReservasParaRecordatorio() {
     return Array.isArray(reservas) ? reservas : [];
   } catch (error) {
     console.error("[RECORDATORIO] Error al obtener reservas:", error.message);
+    return [];
+  }
+}
+
+async function obtenerReservasProximasDiagnostico() {
+  try {
+    const conexion = DataBase.getInstance();
+    const query = `
+      SELECT
+        id_reserva,
+        nombrePaciente,
+        apellidoPaciente,
+        email,
+        fechaInicio,
+        horaInicio,
+        estadoReserva,
+        estadoPeticion,
+        COALESCE(recordatorio12h, 0) as recordatorio12h,
+        COALESCE(recordatorio6h, 0) as recordatorio6h,
+        TIMESTAMP(fechaInicio, horaInicio) as fecha_hora_cita,
+        TIMESTAMPDIFF(MINUTE, NOW(), TIMESTAMP(fechaInicio, horaInicio)) as minutos_restantes
+      FROM reservaPacientes
+      WHERE TIMESTAMP(fechaInicio, horaInicio) > NOW()
+        AND TIMESTAMP(fechaInicio, horaInicio) <= DATE_ADD(NOW(), INTERVAL 24 HOUR)
+      ORDER BY fechaInicio ASC, horaInicio ASC
+      LIMIT 15
+    `;
+
+    const reservas = await conexion.ejecutarQuery(query);
+    return Array.isArray(reservas) ? reservas : [];
+  } catch (error) {
+    console.error("[RECORDATORIO] Error al obtener reservas para diagnóstico:", error.message);
     return [];
   }
 }
@@ -248,9 +333,89 @@ export async function ejecutarRecordatoriosAutomaticos() {
   console.log("[RECORDATORIO] Fecha/Hora actual:", new Date().toLocaleString('es-CL'));
 
   try {
+    const contextoHorario = await obtenerContextoHorarioMySQL();
+    if (contextoHorario) {
+      console.log(
+        "[RECORDATORIO] Contexto MySQL:",
+        JSON.stringify({
+          ahora_mysql: contextoHorario.ahora_mysql,
+          session_time_zone: contextoHorario.session_time_zone,
+          global_time_zone: contextoHorario.global_time_zone
+        })
+      );
+    }
+
+    const columnasOk = await asegurarColumnasRecordatorio();
+    if (!columnasOk) {
+      console.error("[RECORDATORIO] No se pudo verificar/crear columnas. Abortando.");
+      console.log("[RECORDATORIO] ========================================");
+      return { enviados: 0, errores: 1 };
+    }
+
     const reservas = await obtenerReservasParaRecordatorio();
 
     if (reservas.length === 0) {
+      const reservasDiagnostico = await obtenerReservasProximasDiagnostico();
+
+      if (reservasDiagnostico.length > 0) {
+        console.log(`[RECORDATORIO] Diagnóstico: ${reservasDiagnostico.length} reserva(s) futura(s) encontradas en las próximas 24 horas.`);
+
+        for (const reserva of reservasDiagnostico) {
+          const motivos = [];
+
+          if (!['reservada', 'confirmada'].includes(String(reserva.estadoReserva || '').toLowerCase())) {
+            motivos.push(`estadoReserva=${reserva.estadoReserva}`);
+          }
+
+          if (Number(reserva.estadoPeticion) === 0) {
+            motivos.push(`estadoPeticion=${reserva.estadoPeticion}`);
+          }
+
+          if (!reserva.email) {
+            motivos.push("email_vacio");
+          }
+
+          if (!(reserva.minutos_restantes > 0 && reserva.minutos_restantes <= 13 * 60)) {
+            motivos.push(`fuera_rango_13h=${reserva.minutos_restantes}min`);
+          }
+
+          if (
+            !(reserva.minutos_restantes >= 690 && reserva.minutos_restantes <= 750) &&
+            !(reserva.minutos_restantes >= 330 && reserva.minutos_restantes <= 390)
+          ) {
+            motivos.push(`fuera_ventana_envio=${reserva.minutos_restantes}min`);
+          }
+
+          if (reserva.recordatorio12h) {
+            motivos.push("recordatorio12h_ya_enviado");
+          }
+
+          if (reserva.recordatorio6h) {
+            motivos.push("recordatorio6h_ya_enviado");
+          }
+
+          console.log(
+            "[RECORDATORIO] Diagnóstico reserva:",
+            JSON.stringify({
+              id_reserva: reserva.id_reserva,
+              paciente: `${reserva.nombrePaciente || ''} ${reserva.apellidoPaciente || ''}`.trim(),
+              email: reserva.email,
+              estadoReserva: reserva.estadoReserva,
+              estadoPeticion: reserva.estadoPeticion,
+              fechaInicio: reserva.fechaInicio,
+              horaInicio: reserva.horaInicio,
+              fecha_hora_cita: reserva.fecha_hora_cita,
+              minutos_restantes: reserva.minutos_restantes,
+              recordatorio12h: reserva.recordatorio12h,
+              recordatorio6h: reserva.recordatorio6h,
+              motivos_descarte: motivos
+            })
+          );
+        }
+      } else {
+        console.log("[RECORDATORIO] Diagnóstico: no hay reservas futuras en las próximas 24 horas según MySQL.");
+      }
+
       console.log("[RECORDATORIO] No hay reservas próximas para recordar.");
       console.log("[RECORDATORIO] ========================================");
       return { enviados: 0, errores: 0 };
