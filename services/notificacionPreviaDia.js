@@ -68,7 +68,17 @@ async function asegurarColumnasRecordatorio() {
 /**
  * Envía el correo de recordatorio usando Brevo API
  */
-async function enviarCorreoRecordatorio({ email, nombrePaciente, apellidoPaciente, fecha, hora, tipoRecordatorio }) {
+async function enviarCorreoRecordatorio({
+  email,
+  nombrePaciente,
+  apellidoPaciente,
+  fecha,
+  hora,
+  tipoRecordatorio,
+  id_reserva,
+  fechaInicioOriginal,
+  horaInicioOriginal
+}) {
   const { BREVO_API_KEY, CORREO_REMITENTE, NOMBRE_EMPRESA } = process.env;
 
   if (!BREVO_API_KEY) {
@@ -83,6 +93,7 @@ async function enviarCorreoRecordatorio({ email, nombrePaciente, apellidoPacient
 
   const fromEmail = CORREO_REMITENTE;
   const fromName = NOMBRE_EMPRESA || "SiluetaChic";
+  const baseUrl = process.env.BACKEND_URL || "https://siluetachic.nativecode.cl";
 
   if (!fromEmail) {
     console.warn("[RECORDATORIO] CORREO_REMITENTE no configurado. Correo no enviado.");
@@ -91,6 +102,12 @@ async function enviarCorreoRecordatorio({ email, nombrePaciente, apellidoPacient
 
   const horasRestantes = tipoRecordatorio === '12h' ? '12 horas' : '6 horas';
   const subject = `Recordatorio de cita programada - ${horasRestantes} restantes`;
+  const urlConfirmar = id_reserva
+    ? `${baseUrl}/notificacion/confirmar?id_reserva=${id_reserva}&nombrePaciente=${encodeURIComponent(nombrePaciente)}&apellidoPaciente=${encodeURIComponent(apellidoPaciente || '')}&fechaInicio=${encodeURIComponent(fechaInicioOriginal || fecha)}&horaInicio=${encodeURIComponent(horaInicioOriginal || hora)}`
+    : null;
+  const urlCancelar = id_reserva
+    ? `${baseUrl}/notificacion/cancelar?id_reserva=${id_reserva}&nombrePaciente=${encodeURIComponent(nombrePaciente)}&apellidoPaciente=${encodeURIComponent(apellidoPaciente || '')}&fechaInicio=${encodeURIComponent(fechaInicioOriginal || fecha)}&horaInicio=${encodeURIComponent(horaInicioOriginal || hora)}`
+    : null;
 
   const html = `
     <div style="font-family: Arial, sans-serif; color: #222; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
@@ -144,18 +161,23 @@ async function enviarCorreoRecordatorio({ email, nombrePaciente, apellidoPacient
           </table>
         </div>
 
-        <!-- Mensaje importante -->
-        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 0 0 25px 0; border-radius: 0 8px 8px 0;">
-          <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
-            <b>⚠️ Importante:</b> Le solicitamos, por favor, no olvidar asistir a su cita en el horario indicado. 
-            En caso de no poder concurrir, le agradeceremos avisar con anticipación para poder reprogramarla 
-            y así liberar el cupo para otro paciente.
-          </p>
+        <div style="text-align: center; margin: 0 0 25px 0;">
+          <p style="margin-bottom: 15px; font-weight: bold; color: #374151;">¿Confirmas tu asistencia?</p>
+          ${urlConfirmar ? `<a href="${urlConfirmar}" style="display: inline-block; background: #10b981; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 0 10px 10px 10px; font-weight: bold;">✅ Confirmar Cita</a>` : ''}
+          ${urlCancelar ? `<a href="${urlCancelar}" style="display: inline-block; background: #ef4444; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 0 10px 10px 10px; font-weight: bold;">❌ Cancelar Cita</a>` : ''}
         </div>
 
-        <p style="font-size: 14px; color: #6b7280; margin: 0 0 20px 0;">
-          Quedamos atentos/as ante cualquier consulta o confirmación.
-        </p>
+        <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 0 0 25px 0; border-radius: 0 8px 8px 0;">
+          <p style="margin: 0 0 10px 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+            <b>⚠️ Información importante para su cita:</b>
+          </p>
+          <ul style="margin: 0; padding-left: 18px; color: #92400e; font-size: 14px; line-height: 1.7;">
+            <li>Asistir con las zonas a tratar rasuradas, sin vellos.</li>
+            <li>Asistir con las zonas a tratar sin cremas ni desodorantes.</li>
+            <li>Si no podrá asistir debe avisar con 12 horas de anticipación.</li>
+            <li>Cita ausente sin previo aviso se da por realizada.</li>
+          </ul>
+        </div>
 
         <!-- Firma -->
         <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px;">
@@ -187,9 +209,15 @@ Junto con saludarle, queremos recordarle que mantiene una cita agendada según e
 ⏰ Hora: ${hora}
 📍 Lugar: ${DIRECCION_CLINICA}
 
-Le solicitamos, por favor, no olvidar asistir a su cita en el horario indicado. En caso de no poder concurrir, le agradeceremos avisar con anticipación para poder reprogramarla y así liberar el cupo para otro paciente.
+Confirma o cancela tu cita desde los siguientes enlaces:
+${urlConfirmar ? `- Confirmar cita: ${urlConfirmar}` : ''}
+${urlCancelar ? `- Cancelar cita: ${urlCancelar}` : ''}
 
-Quedamos atentos/as ante cualquier consulta o confirmación.
+Información importante para su cita:
+- Asistir con las zonas a tratar rasuradas, sin vellos.
+- Asistir con las zonas a tratar sin cremas ni desodorantes.
+- Si no podrá asistir debe avisar con 12 horas de anticipación.
+- Cita ausente sin previo aviso se da por realizada.
 
 Atentamente,
 Silueta Chic
@@ -451,7 +479,10 @@ export async function ejecutarRecordatoriosAutomaticos() {
           apellidoPaciente,
           fecha: formatearFecha(fechaInicio),
           hora: horaInicio,
-          tipoRecordatorio: '12h'
+          tipoRecordatorio: '12h',
+          id_reserva,
+          fechaInicioOriginal: fechaInicio,
+          horaInicioOriginal: horaInicio
         });
 
         if (enviado) {
@@ -472,7 +503,10 @@ export async function ejecutarRecordatoriosAutomaticos() {
           apellidoPaciente,
           fecha: formatearFecha(fechaInicio),
           hora: horaInicio,
-          tipoRecordatorio: '6h'
+          tipoRecordatorio: '6h',
+          id_reserva,
+          fechaInicioOriginal: fechaInicio,
+          horaInicioOriginal: horaInicio
         });
 
         if (enviado) {
